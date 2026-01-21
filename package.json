@@ -1,15 +1,23 @@
 {
-  "name": "workspace",
+  "name": "desy-mcp-server",
   "version": "1.0.0",
+  "description": "MCP Server para el Sistema de Diseño del Gobierno de Aragón (DESY)",
   "main": "index.js",
+  "type": "module",
+  "types": "index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server-desy.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": [
+    "mcp",
+    "desy",
+    "aragon",
+    "design-system"
+  ],
+  "author": "Gobierno de Aragón",
+  "license": "MIT",
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
     "express": "^5.2.1"
   }
 }

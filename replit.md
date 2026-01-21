@@ -11,20 +11,21 @@ Este proyecto proporciona un servidor MCP (Model Context Protocol) que da acceso
 ## Project Structure
 
 ```
-install-desy-mcp/
+/
 ├── server-desy.js    # Servidor MCP HTTP con Express
 ├── index.js          # Generador de guías de instalación (ESM)
 ├── index.d.ts        # Definiciones TypeScript
 ├── package.json      # Dependencias npm
 ├── README.md         # Documentación
 ├── CHANGELOG.md      # Historial de cambios
-└── LICENSE           # Licencia MIT
+├── LICENSE           # Licencia MIT
+└── replit.md         # Documentación del proyecto
 ```
 
 ## Running the Server
 
 ```bash
-cd install-desy-mcp && npm start
+npm start
 ```
 
 El servidor HTTP se ejecuta en el puerto 5000 y proporciona:
@@ -51,7 +52,7 @@ El servidor HTTP se ejecuta en el puerto 5000 y proporciona:
 
 ## Recent Changes
 
+- Reorganizada estructura de archivos (todo en la raíz)
 - Convertido a servidor HTTP con Express (puerto 5000)
 - Añadida página de instrucciones de instalación
 - Configurado para deploy en https://desy-mcp.replit.app
-- Eliminada integración con Cloudflare Worker

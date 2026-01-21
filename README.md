@@ -1,10 +1,10 @@
-# install-desy-mcp
+# DESY MCP Server
 
-> Installation guides for the DESY MCP Server - Sistema de Diseño del Gobierno de Aragón
+> Servidor MCP para el Sistema de Diseño del Gobierno de Aragón
 
-Este proyecto genera guías de instalación para el servidor MCP de DESY, permitiendo a los usuarios instalar fácilmente el servidor en diferentes clientes MCP.
+Este servidor MCP proporciona acceso programático a la documentación de DESY, permitiendo a los asistentes de IA obtener código de componentes, guías de estilo y patrones.
 
-**Basado en [install-this-mcp](https://github.com/janwilmake/install-this-mcp)**
+**URL de producción**: https://desy-mcp.replit.app
 
 ## Servidor MCP de DESY
 
