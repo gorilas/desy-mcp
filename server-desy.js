@@ -385,7 +385,7 @@ function generateInstallationHTML() {
       config: {
         mcpServers: {
           "DESY MCP Server": {
-            url: SERVER_URL
+            url: `${SERVER_URL}/mcp`
           }
         }
       }
@@ -399,7 +399,7 @@ function generateInstallationHTML() {
           servers: {
             "DESY MCP Server": {
               type: "http",
-              url: SERVER_URL
+              url: `${SERVER_URL}/mcp`
             }
           }
         }
@@ -411,7 +411,7 @@ function generateInstallationHTML() {
       instructions: `Ir a <strong>Settings → Connectors → Add Custom Connector</strong> y rellenar:
       <ul>
         <li><strong>Name</strong>: DESY MCP Server</li>
-        <li><strong>URL</strong>: ${SERVER_URL}</li>
+        <li><strong>URL</strong>: ${SERVER_URL}/mcp</li>
       </ul>`,
       config: null
     },
@@ -419,7 +419,7 @@ function generateInstallationHTML() {
       name: "Claude Code",
       icon: "https://www.google.com/s2/favicons?domain=claude.ai&sz=64",
       instructions: `Ejecutar en terminal:`,
-      command: `claude mcp add --transport http "DESY-MCP-Server" ${SERVER_URL}`
+      command: `claude mcp add --transport http "DESY-MCP-Server" ${SERVER_URL}/mcp`
     },
     {
       name: "Windsurf",
@@ -428,7 +428,7 @@ function generateInstallationHTML() {
       config: {
         mcpServers: {
           "DESY MCP Server": {
-            serverUrl: SERVER_URL
+            serverUrl: `${SERVER_URL}/mcp`
           }
         }
       }
