@@ -1,0 +1,30 @@
+modules = ["nodejs-20"]
+[nix]
+channel = "stable-25_05"
+packages = ["unzip"]
+
+[agent]
+expertMode = true
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "DESY MCP Server"
+
+[[workflows.workflow]]
+name = "DESY MCP Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd install-desy-mcp && npm start"
+
+[workflows.workflow.metadata]
+outputType = "console"

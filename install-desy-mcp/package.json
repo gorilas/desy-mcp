@@ -1,0 +1,24 @@
+{
+  "name": "install-desy-mcp",
+  "version": "1.0.0",
+  "description": "Installation guides for DESY MCP Server - Sistema de Diseño del Gobierno de Aragón",
+  "main": "index.js",
+  "type": "module",
+  "types": "index.d.ts",
+  "scripts": {
+    "start": "node server-desy.js"
+  },
+  "keywords": [
+    "mcp",
+    "installation",
+    "guide",
+    "desy",
+    "aragon",
+    "gov"
+  ],
+  "author": "Gobierno de Aragón",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  }
+}
