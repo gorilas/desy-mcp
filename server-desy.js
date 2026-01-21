@@ -465,6 +465,9 @@ function generateInstallationHTML() {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DESY MCP Server - Instalación</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/favicon.svg">
+  <link rel="mask-icon" href="/favicon.svg" color="#fce400">
+  <meta name="msapplication-TileImage" content="/favicon.svg">
   <style>
     * {
       box-sizing: border-box;
