@@ -432,48 +432,25 @@ function generateInstallationHTML() {
           }
         }
       }
-    },
-    {
-      name: "ChatGPT",
-      icon: "https://www.google.com/s2/favicons?domain=chatgpt.com&sz=64",
-      instructions: `Ir a <strong>Settings → Connectors → Advanced Settings</strong>, activar <strong>Developer Mode</strong>. Luego crear conector con:
-      <ul>
-        <li><strong>Name</strong>: DESY MCP Server</li>
-        <li><strong>URL</strong>: ${SERVER_URL}/mcp</li>
-        <li><strong>Authentication</strong>: OAuth</li>
-      </ul>`,
-      config: null
-    },
-    {
-      name: "Gemini CLI",
-      icon: "https://www.google.com/s2/favicons?domain=gemini.google.com&sz=64",
-      instructions: `Añadir a <code>~/.gemini/settings.json</code>:`,
-      config: {
-        mcpServers: {
-          "DESY MCP Server": {
-            httpUrl: `${SERVER_URL}/mcp`
-          }
-        }
-      }
     }
   ];
 
   const clientCards = clients.map(client => {
     let configSection = '';
     if (client.config) {
-      configSection = `<pre class="c-pre"><code>${JSON.stringify(client.config, null, 2)}</code></pre>`;
+      configSection = `<pre><code>${JSON.stringify(client.config, null, 2)}</code></pre>`;
     }
     if (client.command) {
-      configSection = `<pre class="c-pre"><code>${client.command}</code></pre>`;
+      configSection = `<pre><code class="language-bash">${client.command}</code></pre>`;
     }
 
     return `
-      <div class="c-card">
-        <div class="c-card__header">
-          <img src="${client.icon}" alt="${client.name}" class="c-card__icon">
-          <h3 class="c-card__title">${client.name}</h3>
+      <div class="client-card">
+        <div class="client-header">
+          <img src="${client.icon}" alt="${client.name}" class="client-icon">
+          <h3>${client.name}</h3>
         </div>
-        <div class="c-card__body">
+        <div class="client-instructions">
           <p>${client.instructions}</p>
           ${configSection}
         </div>
@@ -491,35 +468,7 @@ function generateInstallationHTML() {
   <link rel="apple-touch-icon" href="/favicon.svg">
   <link rel="mask-icon" href="/favicon.svg" color="#fce400">
   <meta name="msapplication-TileImage" content="/favicon.svg">
-  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --color-primary: #226937;
-      --color-primary-dark: #1a5029;
-      --color-primary-light: #e8f5eb;
-      --color-warning: #fce400;
-      --color-warning-dark: #d4bf00;
-      --color-neutral-dark: #212529;
-      --color-neutral-base: #6c757d;
-      --color-neutral-light: #f8f9fa;
-      --color-white: #ffffff;
-      --color-black: #000000;
-      --color-border: #dee2e6;
-      --color-focus: #fce400;
-      --font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-      --radius-sm: 4px;
-      --radius-md: 8px;
-      --spacing-xs: 0.25rem;
-      --spacing-sm: 0.5rem;
-      --spacing-md: 1rem;
-      --spacing-lg: 1.5rem;
-      --spacing-xl: 2rem;
-      --spacing-2xl: 3rem;
-    }
-
     * {
       box-sizing: border-box;
       margin: 0;
@@ -527,416 +476,228 @@ function generateInstallationHTML() {
     }
     
     body {
-      font-family: var(--font-family);
-      background-color: var(--color-neutral-light);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
       min-height: 100vh;
-      color: var(--color-neutral-dark);
+      color: #e0e0e0;
       line-height: 1.6;
-      font-size: 1rem;
     }
-
-    a {
-      color: var(--color-primary);
-      text-decoration: underline;
-    }
-
-    a:hover {
-      color: var(--color-primary-dark);
-    }
-
-    a:focus {
-      outline: 3px solid var(--color-focus);
-      outline-offset: 2px;
-    }
-
-    .c-header {
-      background-color: var(--color-white);
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    .c-header__top {
-      background-color: var(--color-primary);
-      padding: var(--spacing-sm) 0;
-    }
-
-    .c-header__top-inner {
-      max-width: 1200px;
+    
+    .container {
+      max-width: 900px;
       margin: 0 auto;
-      padding: 0 var(--spacing-lg);
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-md);
+      padding: 40px 20px;
     }
-
-    .c-header__logo {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-sm);
-      color: var(--color-white);
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 0.875rem;
+    
+    header {
+      text-align: center;
+      margin-bottom: 50px;
     }
-
-    .c-header__logo:hover {
-      color: var(--color-white);
+    
+    h1 {
+      font-size: 2.5rem;
+      color: #fff;
+      margin-bottom: 10px;
     }
-
-    .c-header__logo svg {
-      height: 24px;
-      width: auto;
+    
+    .subtitle {
+      font-size: 1.2rem;
+      color: #a0a0a0;
     }
-
-    .c-header__main {
-      padding: var(--spacing-lg) 0;
+    
+    .server-info {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 40px;
+      text-align: center;
     }
-
-    .c-header__main-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 var(--spacing-lg);
-    }
-
-    .c-header__title {
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--color-neutral-dark);
-      margin-bottom: var(--spacing-xs);
-    }
-
-    .c-header__subtitle {
-      font-size: 1.125rem;
-      color: var(--color-neutral-base);
-      font-weight: 400;
-    }
-
-    .c-main {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: var(--spacing-2xl) var(--spacing-lg);
-    }
-
-    .c-section {
-      margin-bottom: var(--spacing-2xl);
-    }
-
-    .c-section__title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--color-neutral-dark);
-      margin-bottom: var(--spacing-lg);
-      padding-bottom: var(--spacing-sm);
-      border-bottom: 3px solid var(--color-primary);
+    
+    .server-url {
+      font-family: monospace;
+      font-size: 1.1rem;
+      color: #4fc3f7;
+      background: rgba(79, 195, 247, 0.1);
+      padding: 10px 20px;
+      border-radius: 6px;
       display: inline-block;
     }
-
-    .c-server-info {
-      background-color: var(--color-primary-light);
-      border: 1px solid var(--color-primary);
-      border-left: 4px solid var(--color-primary);
-      border-radius: var(--radius-md);
-      padding: var(--spacing-lg);
-      margin-bottom: var(--spacing-2xl);
+    
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 30px;
+      color: #fff;
+      text-align: center;
     }
-
-    .c-server-info__label {
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: var(--color-primary-dark);
-      margin-bottom: var(--spacing-sm);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .c-server-info__url {
-      font-family: 'Consolas', 'Monaco', monospace;
-      font-size: 1.125rem;
-      color: var(--color-primary-dark);
-      background-color: var(--color-white);
-      padding: var(--spacing-sm) var(--spacing-md);
-      border-radius: var(--radius-sm);
-      display: inline-block;
-      border: 1px solid var(--color-primary);
-      word-break: break-all;
-    }
-
-    .c-cards-grid {
+    
+    .clients-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: var(--spacing-lg);
+      gap: 20px;
     }
-
-    .c-card {
-      background-color: var(--color-white);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-sm);
-      transition: box-shadow 0.2s ease, transform 0.2s ease;
-      overflow: hidden;
+    
+    .client-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 25px;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
-
-    .c-card:hover {
-      box-shadow: var(--shadow-md);
+    
+    .client-card:hover {
       transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
     }
-
-    .c-card__header {
+    
+    .client-header {
       display: flex;
       align-items: center;
-      gap: var(--spacing-md);
-      padding: var(--spacing-md) var(--spacing-lg);
-      background-color: var(--color-neutral-light);
-      border-bottom: 1px solid var(--color-border);
+      gap: 15px;
+      margin-bottom: 15px;
     }
-
-    .c-card__icon {
+    
+    .client-icon {
       width: 32px;
       height: 32px;
-      border-radius: var(--radius-sm);
-      flex-shrink: 0;
+      border-radius: 6px;
     }
-
-    .c-card__title {
-      font-size: 1.125rem;
-      font-weight: 700;
-      color: var(--color-neutral-dark);
-      margin: 0;
+    
+    .client-header h3 {
+      font-size: 1.3rem;
+      color: #fff;
     }
-
-    .c-card__body {
-      padding: var(--spacing-lg);
+    
+    .client-instructions p {
+      margin-bottom: 15px;
+      color: #b0b0b0;
     }
-
-    .c-card__body p {
-      color: var(--color-neutral-base);
-      margin-bottom: var(--spacing-md);
-      font-size: 0.9375rem;
+    
+    .client-instructions ul {
+      margin: 10px 0 15px 20px;
+      color: #b0b0b0;
     }
-
-    .c-card__body ul {
-      margin: var(--spacing-sm) 0 var(--spacing-md) var(--spacing-lg);
-      color: var(--color-neutral-base);
-    }
-
-    .c-card__body li {
-      margin-bottom: var(--spacing-xs);
-    }
-
-    .c-card__body code {
-      font-family: 'Consolas', 'Monaco', monospace;
-      background-color: var(--color-neutral-light);
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-size: 0.875rem;
-      color: var(--color-primary-dark);
-    }
-
-    .c-pre {
-      background-color: #1e1e1e;
-      border-radius: var(--radius-sm);
-      padding: var(--spacing-md);
+    
+    pre {
+      background: #0d1117;
+      border-radius: 8px;
+      padding: 15px;
       overflow-x: auto;
-      margin: 0;
     }
-
-    .c-pre code {
-      font-family: 'Consolas', 'Monaco', 'Fira Code', monospace;
-      font-size: 0.8125rem;
-      color: #d4d4d4;
-      background: none;
-      padding: 0;
-      line-height: 1.5;
-      white-space: pre;
+    
+    code {
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.9rem;
+      color: #79c0ff;
     }
-
-    .c-tools-grid {
+    
+    .tools-section {
+      margin-top: 50px;
+      padding-top: 40px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .tools-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: var(--spacing-md);
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
     }
-
-    .c-tool {
-      background-color: var(--color-white);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      padding: var(--spacing-md);
-      transition: border-color 0.2s ease;
+    
+    .tool-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 15px;
     }
-
-    .c-tool:hover {
-      border-color: var(--color-primary);
+    
+    .tool-card h4 {
+      color: #4fc3f7;
+      font-family: monospace;
+      margin-bottom: 8px;
     }
-
-    .c-tool__name {
-      font-family: 'Consolas', 'Monaco', monospace;
-      font-size: 0.9375rem;
-      font-weight: 600;
-      color: var(--color-primary);
-      margin-bottom: var(--spacing-xs);
+    
+    .tool-card p {
+      font-size: 0.9rem;
+      color: #909090;
     }
-
-    .c-tool__desc {
-      font-size: 0.875rem;
-      color: var(--color-neutral-base);
-      margin: 0;
+    
+    footer {
+      margin-top: 60px;
+      text-align: center;
+      color: #606060;
+      font-size: 0.9rem;
     }
-
-    .c-footer {
-      background-color: var(--color-neutral-dark);
-      color: var(--color-white);
-      padding: var(--spacing-xl) 0;
-      margin-top: var(--spacing-2xl);
-    }
-
-    .c-footer__inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 var(--spacing-lg);
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: var(--spacing-md);
-    }
-
-    .c-footer__text {
-      font-size: 0.875rem;
-      opacity: 0.9;
-    }
-
-    .c-footer__links {
-      display: flex;
-      gap: var(--spacing-lg);
-    }
-
-    .c-footer__link {
-      color: var(--color-white);
+    
+    footer a {
+      color: #4fc3f7;
       text-decoration: none;
-      font-size: 0.875rem;
-      opacity: 0.9;
-      transition: opacity 0.2s ease;
     }
-
-    .c-footer__link:hover {
-      opacity: 1;
-      color: var(--color-white);
-    }
-
-    .c-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--spacing-xs);
-      background-color: var(--color-warning);
-      color: var(--color-black);
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: var(--spacing-xs) var(--spacing-sm);
-      border-radius: var(--radius-sm);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    @media (max-width: 768px) {
-      .c-header__title {
-        font-size: 1.5rem;
-      }
-
-      .c-cards-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .c-tools-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .c-footer__inner {
-        flex-direction: column;
-        text-align: center;
-      }
+    
+    footer a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
-  <header class="c-header">
-    <div class="c-header__top">
-      <div class="c-header__top-inner">
-        <a href="https://www.aragon.es" class="c-header__logo" target="_blank">
-          <svg viewBox="0 0 120 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <text x="0" y="18" font-family="Public Sans, sans-serif" font-size="14" font-weight="700">GOBIERNO DE ARAGÓN</text>
-          </svg>
-        </a>
+  <div class="container">
+    <header>
+      <h1>DESY MCP Server</h1>
+      <p class="subtitle">Sistema de Diseño del Gobierno de Aragón</p>
+    </header>
+    
+    <div class="server-info">
+      <p>URL del servidor MCP:</p>
+      <div class="server-url">${SERVER_URL}/mcp</div>
+    </div>
+    
+    <h2>Instrucciones de Instalación</h2>
+    
+    <div class="clients-grid">
+      ${clientCards}
+    </div>
+    
+    <div class="tools-section">
+      <h2>Herramientas Disponibles</h2>
+      <div class="tools-grid">
+        <div class="tool-card">
+          <h4>get_component_code_html</h4>
+          <p>Obtiene el código HTML de un componente</p>
+        </div>
+        <div class="tool-card">
+          <h4>get_component_code_nunjucks</h4>
+          <p>Obtiene el código Nunjucks de un componente</p>
+        </div>
+        <div class="tool-card">
+          <h4>get_component_code_angular</h4>
+          <p>Obtiene el código Angular de un componente</p>
+        </div>
+        <div class="tool-card">
+          <h4>get_component_props</h4>
+          <p>Obtiene las propiedades configurables</p>
+        </div>
+        <div class="tool-card">
+          <h4>search_components</h4>
+          <p>Busca componentes por nombre o descripción</p>
+        </div>
+        <div class="tool-card">
+          <h4>get_guideline</h4>
+          <p>Obtiene guías de estilo y documentación</p>
+        </div>
+        <div class="tool-card">
+          <h4>list_categories</h4>
+          <p>Lista todas las categorías disponibles</p>
+        </div>
+        <div class="tool-card">
+          <h4>refresh_cache</h4>
+          <p>Actualiza el cache de documentación</p>
+        </div>
       </div>
     </div>
-    <div class="c-header__main">
-      <div class="c-header__main-inner">
-        <h1 class="c-header__title">DESY MCP Server</h1>
-        <p class="c-header__subtitle">Servidor MCP para el Sistema de Diseño del Gobierno de Aragón</p>
-      </div>
-    </div>
-  </header>
-
-  <main class="c-main">
-    <div class="c-server-info">
-      <p class="c-server-info__label">URL del servidor MCP</p>
-      <code class="c-server-info__url">${SERVER_URL}/mcp</code>
-    </div>
-
-    <section class="c-section">
-      <h2 class="c-section__title">Instrucciones de instalación</h2>
-      <div class="c-cards-grid">
-        ${clientCards}
-      </div>
-    </section>
-
-    <section class="c-section">
-      <h2 class="c-section__title">Herramientas disponibles</h2>
-      <div class="c-tools-grid">
-        <div class="c-tool">
-          <h4 class="c-tool__name">get_component_code_html</h4>
-          <p class="c-tool__desc">Obtiene el código HTML de un componente de DESY</p>
-        </div>
-        <div class="c-tool">
-          <h4 class="c-tool__name">get_component_code_nunjucks</h4>
-          <p class="c-tool__desc">Obtiene el código Nunjucks de un componente</p>
-        </div>
-        <div class="c-tool">
-          <h4 class="c-tool__name">get_component_code_angular</h4>
-          <p class="c-tool__desc">Obtiene el código Angular de un componente</p>
-        </div>
-        <div class="c-tool">
-          <h4 class="c-tool__name">get_component_props</h4>
-          <p class="c-tool__desc">Obtiene las propiedades configurables de un componente</p>
-        </div>
-        <div class="c-tool">
-          <h4 class="c-tool__name">search_components</h4>
-          <p class="c-tool__desc">Busca componentes por nombre o descripción</p>
-        </div>
-        <div class="c-tool">
-          <h4 class="c-tool__name">get_guideline</h4>
-          <p class="c-tool__desc">Obtiene guías de estilo y documentación oficial</p>
-        </div>
-        <div class="c-tool">
-          <h4 class="c-tool__name">list_categories</h4>
-          <p class="c-tool__desc">Lista todas las categorías y componentes disponibles</p>
-        </div>
-        <div class="c-tool">
-          <h4 class="c-tool__name">refresh_cache</h4>
-          <p class="c-tool__desc">Fuerza la actualización del cache de documentación</p>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="c-footer">
-    <div class="c-footer__inner">
-      <p class="c-footer__text">Desarrollado para el Sistema de Diseño DESY del Gobierno de Aragón</p>
-      <div class="c-footer__links">
-        <a href="https://desy.aragon.es" class="c-footer__link" target="_blank">DESY</a>
-        <a href="https://www.aragon.es" class="c-footer__link" target="_blank">Gobierno de Aragón</a>
-        <a href="https://bitbucket.org/sdaragon/desy-html" class="c-footer__link" target="_blank">Repositorio</a>
-      </div>
-    </div>
-  </footer>
+    
+    <footer>
+      <p>Desarrollado para el <a href="https://desy.aragon.es" target="_blank">Sistema de Diseño DESY</a> del <a href="https://www.aragon.es" target="_blank">Gobierno de Aragón</a></p>
+    </footer>
+  </div>
 </body>
 </html>`;
 }

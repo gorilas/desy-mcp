@@ -52,13 +52,6 @@ El servidor HTTP se ejecuta en el puerto 5000 y proporciona:
 
 ## Recent Changes
 
-- **Enero 2026**: Rediseño completo de la página de instalación con el sistema de diseño DESY
-  - Aplicados colores oficiales (verde primario #226937, amarillo warning #fce400)
-  - Tipografía Public Sans
-  - Cabecera con estilo del Gobierno de Aragón
-  - Tarjetas con diseño limpio y consistente
-  - Añadido soporte para ChatGPT y Gemini CLI
-  - Footer con enlaces a recursos oficiales
 - Reorganizada estructura de archivos (todo en la raíz)
 - Convertido a servidor HTTP con Express (puerto 5000)
 - Añadida página de instrucciones de instalación
