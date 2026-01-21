@@ -79,6 +79,13 @@ function parseLlmsTxt(content) {
       }
     } else if (stripped.startsWith("### ")) {
       currentCategory = stripped.slice(4).trim();
+      if (currentCategory && !categories[currentCategory]) {
+        categories[currentCategory] = {
+          name: currentCategory,
+          description: `Componentes de ${currentCategory.toLowerCase()}`,
+          components: [],
+        };
+      }
     } else if (stripped.startsWith("- ")) {
       const link = parseMarkdownLink(stripped.slice(2));
       if (link && link.url.includes("/componente-")) {
