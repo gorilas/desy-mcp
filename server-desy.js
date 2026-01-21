@@ -464,6 +464,7 @@ function generateInstallationHTML() {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DESY MCP Server - Instalación</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <style>
     * {
       box-sizing: border-box;
@@ -702,6 +703,10 @@ app.get("/", (req, res) => {
   res.setHeader("Content-Type", "text/html");
   res.setHeader("Cache-Control", "no-cache");
   res.send(generateInstallationHTML());
+});
+
+app.get("/favicon.svg", (req, res) => {
+  res.sendFile(process.cwd() + "/favicon.svg");
 });
 
 app.get("/health", (req, res) => {
