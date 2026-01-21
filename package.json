@@ -17,7 +17,7 @@
   "author": "Gobierno de Aragón",
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@modelcontextprotocol/sdk": "^1.25.3",
     "cors": "^2.8.5",
     "express": "^5.2.1"
   }

@@ -17,7 +17,11 @@ import crypto from "crypto";
 import cors from "cors";
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true,
+  exposedHeaders: ['mcp-session-id', 'Mcp-Session-Id']
+}));
 app.use(express.json());
 
 const PORT = 5000;
@@ -722,15 +726,27 @@ function generateSessionId() {
   return crypto.randomUUID();
 }
 
-app.post("/mcp", async (req, res) => {
+async function handleMcpRequest(req, res) {
   try {
     let sessionId = req.headers["mcp-session-id"];
     let session = sessionId ? sessions.get(sessionId) : null;
     
     if (!session) {
+      if (req.method === "GET") {
+        res.status(400).json({ 
+          jsonrpc: "2.0",
+          error: { code: -32000, message: "Session not found. Send POST first." },
+          id: null
+        });
+        return;
+      }
+      
       sessionId = generateSessionId();
       const transport = new StreamableHTTPServerTransport({
         sessionIdGenerator: () => sessionId,
+        onsessioninitialized: (id) => {
+          console.log(`Session initialized: ${id}`);
+        }
       });
       const server = createMcpServer();
       await server.connect(transport);
@@ -741,40 +757,30 @@ app.post("/mcp", async (req, res) => {
       session.lastAccess = Date.now();
     }
     
-    res.setHeader("mcp-session-id", sessionId);
-    res.setHeader("Access-Control-Expose-Headers", "mcp-session-id");
-    await session.transport.handleRequest(req, res);
+    res.setHeader("Mcp-Session-Id", sessionId);
+    await session.transport.handleRequest(req, res, req.body);
   } catch (error) {
-    console.error("MCP POST error:", error);
+    console.error(`MCP ${req.method} error:`, error);
     if (!res.headersSent) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ 
+        jsonrpc: "2.0",
+        error: { code: -32603, message: error.message },
+        id: null
+      });
     }
   }
-});
+}
 
-app.get("/mcp", async (req, res) => {
-  try {
-    const sessionId = req.headers["mcp-session-id"];
-    const session = sessionId ? sessions.get(sessionId) : null;
-    
-    if (!session) {
-      res.status(400).json({ error: "Session not found. Send a POST request first to initialize." });
-      return;
-    }
-    
-    session.lastAccess = Date.now();
-    await session.transport.handleRequest(req, res);
-  } catch (error) {
-    console.error("MCP GET error:", error);
-    if (!res.headersSent) {
-      res.status(500).json({ error: error.message });
-    }
-  }
-});
+app.post("/mcp", handleMcpRequest);
+app.get("/mcp", handleMcpRequest);
 
 app.delete("/mcp", async (req, res) => {
   const sessionId = req.headers["mcp-session-id"];
   if (sessionId && sessions.has(sessionId)) {
+    const session = sessions.get(sessionId);
+    try {
+      await session.transport.close?.();
+    } catch (e) {}
     sessions.delete(sessionId);
   }
   res.status(200).json({ message: "Session closed" });
