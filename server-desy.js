@@ -379,18 +379,6 @@ function createMcpServer() {
 function generateInstallationHTML() {
   const clients = [
     {
-      name: "Cursor",
-      icon: "https://www.google.com/s2/favicons?domain=cursor.com&sz=64",
-      instructions: `Añadir a <code>~/.cursor/mcp.json</code> o <code>.cursor/mcp.json</code> (proyecto-específico):`,
-      config: {
-        mcpServers: {
-          "DESY MCP Server": {
-            url: `${SERVER_URL}/mcp`
-          }
-        }
-      }
-    },
-    {
       name: "VS Code",
       icon: "https://www.google.com/s2/favicons?domain=code.visualstudio.com&sz=64",
       instructions: `Añadir al <code>settings.json</code> de VS Code:`,
@@ -401,6 +389,18 @@ function generateInstallationHTML() {
               type: "http",
               url: `${SERVER_URL}/mcp`
             }
+          }
+        }
+      }
+    },
+    {
+      name: "Cursor",
+      icon: "https://www.google.com/s2/favicons?domain=cursor.com&sz=64",
+      instructions: `Añadir a <code>~/.cursor/mcp.json</code> o <code>.cursor/mcp.json</code> (proyecto-específico):`,
+      config: {
+        mcpServers: {
+          "DESY MCP Server": {
+            url: `${SERVER_URL}/mcp`
           }
         }
       }
