@@ -214,7 +214,7 @@ async function searchComponents(query) {
   const { components } = await fetchLlmsTxt();
   
   if (!query || typeof query !== 'string') {
-    return Object.values(components).slice(0, 20).map(comp => ({
+    return Object.values(components).slice(0, 100).map(comp => ({
       name: comp.name,
       description: comp.description,
       category: comp.category,
@@ -246,7 +246,7 @@ async function searchComponents(query) {
     }
   }
 
-  return results.slice(0, 20);
+  return results.slice(0, 100);
 }
 
 async function getGuideline(section) {
