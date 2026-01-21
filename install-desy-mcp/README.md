@@ -37,7 +37,7 @@ Añadir a `~/.cursor/mcp.json` o `.cursor/mcp.json` (proyecto-específico):
 {
   "mcpServers": {
     "DESY MCP Server": {
-      "url": "https://desy.aragon.es/install-desy-mcp/"
+      "url": "https://desy-mcp.replit.app"
     }
   }
 }
@@ -53,7 +53,7 @@ Añadir al `settings.json` de VS Code:
     "servers": {
       "DESY MCP Server": {
         "type": "http",
-        "url": "https://desy.aragon.es/install-desy-mcp/"
+        "url": "https://desy-mcp.replit.app"
       }
     }
   }
@@ -65,14 +65,14 @@ Añadir al `settings.json` de VS Code:
 1. Ir a **Settings → Connectors → Add Custom Connector**
 2. Rellenar:
    - **Name**: `DESY MCP Server`
-   - **URL**: `https://desy.aragon.es/install-desy-mcp/`
+   - **URL**: `https://desy-mcp.replit.app`
 
 ### Claude Code
 
 Ejecutar en terminal:
 
 ```bash
-claude mcp add --transport http "DESY-MCP-Server" https://desy.aragon.es/install-desy-mcp/
+claude mcp add --transport http "DESY-MCP-Server" https://desy-mcp.replit.app
 ```
 
 ### Windsurf
@@ -81,48 +81,11 @@ claude mcp add --transport http "DESY-MCP-Server" https://desy.aragon.es/install
 {
   "mcpServers": {
     "DESY MCP Server": {
-      "serverUrl": "https://desy.aragon.es/install-desy-mcp/"
+      "serverUrl": "https://desy-mcp.replit.app"
     }
   }
 }
 ```
-
-### Cline
-
-1. Ir a **MCP Servers** → **Remote Servers** → **Edit Configuration**
-2. Añadir:
-
-```json
-{
-  "mcpServers": {
-    "DESY MCP Server": {
-      "url": "https://desy.aragon.es/install-desy-mcp/",
-      "type": "streamableHttp"
-    }
-  }
-}
-```
-
-### Gemini CLI
-
-Añadir a `~/.gemini/settings.json`:
-
-```json
-{
-  "mcpServers": {
-    "DESY MCP Server": { "httpUrl": "https://desy.aragon.es/install-desy-mcp/" }
-  }
-}
-```
-
-### ChatGPT
-
-1. Ir a **Settings → Connectors → Advanced Settings** y activar **Developer Mode**
-2. En connector settings, hacer clic en **create**
-3. Rellenar:
-   - **Name**: `DESY MCP Server`
-   - **URL**: `https://desy.aragon.es/install-desy-mcp/`
-   - **Authentication**: OAuth
 
 ## Desarrollo
 
@@ -141,7 +104,9 @@ npm install
 npm start
 ```
 
-El servidor se ejecuta usando stdio, que es el protocolo estándar para servidores MCP.
+El servidor HTTP se ejecuta en el puerto 5000 y proporciona:
+- Página de instrucciones en `/`
+- Endpoint MCP en `/mcp`
 
 ## Licencia
 

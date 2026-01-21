@@ -6,19 +6,19 @@ Servidor MCP para el Sistema de Diseño del Gobierno de Aragón (DESY).
 
 Este proyecto proporciona un servidor MCP (Model Context Protocol) que da acceso programático a la documentación del sistema de diseño DESY, incluyendo componentes, patrones, guías de estilo y código en HTML, Nunjucks y Angular.
 
+**URL de producción**: https://desy-mcp.replit.app
+
 ## Project Structure
 
 ```
 install-desy-mcp/
-├── server-desy.js    # Servidor MCP principal
-├── index.js          # Generador de guías de instalación
+├── server-desy.js    # Servidor MCP HTTP con Express
+├── index.js          # Generador de guías de instalación (ESM)
 ├── index.d.ts        # Definiciones TypeScript
 ├── package.json      # Dependencias npm
 ├── README.md         # Documentación
 ├── CHANGELOG.md      # Historial de cambios
-├── SPEC.md           # Especificaciones
-├── LICENSE           # Licencia MIT
-└── iframe.html       # Página HTML embebida
+└── LICENSE           # Licencia MIT
 ```
 
 ## Running the Server
@@ -27,7 +27,10 @@ install-desy-mcp/
 cd install-desy-mcp && npm start
 ```
 
-El servidor se ejecuta usando stdio (protocolo estándar MCP).
+El servidor HTTP se ejecuta en el puerto 5000 y proporciona:
+- Página de instrucciones en `/`
+- Endpoint MCP en `/mcp`
+- Health check en `/health`
 
 ## Herramientas MCP disponibles
 
@@ -44,8 +47,11 @@ El servidor se ejecuta usando stdio (protocolo estándar MCP).
 
 - Node.js 20+
 - @modelcontextprotocol/sdk
+- express
 
 ## Recent Changes
 
+- Convertido a servidor HTTP con Express (puerto 5000)
+- Añadida página de instrucciones de instalación
+- Configurado para deploy en https://desy-mcp.replit.app
 - Eliminada integración con Cloudflare Worker
-- Configurado para ejecutarse directamente con Node.js

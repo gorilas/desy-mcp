@@ -11,7 +11,7 @@
 // DESY Server Configuration
 const DESY_CONFIG = {
   serverName: "DESY MCP Server",
-  mcpUrl: "https://desy.aragon.es/install-desy-mcp/"
+  mcpUrl: "https://desy-mcp.replit.app"
 };
 
 /**

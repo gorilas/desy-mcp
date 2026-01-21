@@ -7,31 +7,26 @@
  * Basado en install-this-mcp: https://github.com/janwilmake/install-this-mcp
  */
 
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-  ListResourcesRequestSchema,
-  ReadResourceRequestSchema,
-  ListPromptsRequestSchema,
-  GetPromptRequestSchema,
-} from "@modelcontextprotocol/sdk/types.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import express from "express";
 import https from "https";
 import http from "http";
+import crypto from "crypto";
 
+const app = express();
+app.use(express.json());
+
+const PORT = 5000;
+const SERVER_URL = "https://desy-mcp.replit.app";
 const LLMS_TXT_URL = "https://desy.aragon.es/llms.txt";
-const CACHE_DURATION_MS = 24 * 60 * 60 * 1000; // 24 horas
+const CACHE_DURATION_MS = 24 * 60 * 60 * 1000;
 
-// Cache management
 let cache = {
   data: null,
   timestamp: 0,
 };
 
-/**
- * Fetch with proper SSL handling for Node.js
- */
 function fetchUrl(url) {
   return new Promise((resolve, reject) => {
     const protocol = url.startsWith("https") ? https : http;
@@ -46,9 +41,6 @@ function fetchUrl(url) {
   });
 }
 
-/**
- * Parse markdown link [text](url)
- */
 function parseMarkdownLink(line) {
   const match = line.trim().match(/\[([^\]]+)\]\(([^)]+)\)/);
   if (match) {
@@ -57,9 +49,6 @@ function parseMarkdownLink(line) {
   return null;
 }
 
-/**
- * Parse llms.txt content
- */
 function parseLlmsTxt(content) {
   const categories = {};
   const components = {};
@@ -72,7 +61,6 @@ function parseLlmsTxt(content) {
 
     if (!stripped) continue;
 
-    // Check for section headers
     if (stripped.startsWith("## ")) {
       currentCategory = stripped.slice(3).trim();
       if (currentCategory && !categories[currentCategory]) {
@@ -117,9 +105,6 @@ function parseLlmsTxt(content) {
   return { categories, components };
 }
 
-/**
- * Fetch and parse llms.txt with cache
- */
 async function fetchLlmsTxt(forceRefresh = false) {
   const now = Date.now();
   const cacheExpired = now - cache.timestamp > CACHE_DURATION_MS;
@@ -141,9 +126,6 @@ async function fetchLlmsTxt(forceRefresh = false) {
   }
 }
 
-/**
- * Get component code
- */
 async function getComponentCode(tech, component) {
   const { components } = await fetchLlmsTxt();
   const key = component.toLowerCase().trim();
@@ -163,9 +145,6 @@ async function getComponentCode(tech, component) {
   }
 }
 
-/**
- * Get component props
- */
 async function getComponentProps(component) {
   const { components } = await fetchLlmsTxt();
   const key = component.toLowerCase().trim();
@@ -203,9 +182,6 @@ async function getComponentProps(component) {
   }
 }
 
-/**
- * Search components
- */
 async function searchComponents(query) {
   const { components } = await fetchLlmsTxt();
   const queryLower = query.toLowerCase();
@@ -213,9 +189,9 @@ async function searchComponents(query) {
 
   for (const [key, comp] of Object.entries(components)) {
     if (
-      queryLower.includes(key) ||
-      queryLower.includes(comp.name.toLowerCase()) ||
-      queryLower.includes(comp.description.toLowerCase())
+      key.includes(queryLower) ||
+      comp.name.toLowerCase().includes(queryLower) ||
+      comp.description.toLowerCase().includes(queryLower)
     ) {
       results.push({
         name: comp.name,
@@ -232,15 +208,12 @@ async function searchComponents(query) {
   return results.slice(0, 20);
 }
 
-/**
- * Get guideline section
- */
 async function getGuideline(section) {
   const { categories } = await fetchLlmsTxt();
   const sectionLower = section.toLowerCase().trim();
 
   for (const [catName, category] of Object.entries(categories)) {
-    if (sectionLower.includes(catName.toLowerCase())) {
+    if (catName.toLowerCase().includes(sectionLower)) {
       const lines = [`# ${catName}\n`];
       lines.push(`${category.description}\n\n`);
 
@@ -254,7 +227,7 @@ async function getGuideline(section) {
 
   for (const category of Object.values(categories)) {
     for (const comp of category.components) {
-      if (sectionLower.includes(comp.name.toLowerCase()) || sectionLower.includes(comp.url.toLowerCase())) {
+      if (comp.name.toLowerCase().includes(sectionLower) || comp.url.toLowerCase().includes(sectionLower)) {
         try {
           return await fetchUrl(comp.url);
         } catch {
@@ -268,9 +241,6 @@ async function getGuideline(section) {
   return `Sección '${section}' no encontrada.\n\nSecciones disponibles:\n- ${available.join("\n- ")}`;
 }
 
-/**
- * List categories
- */
 async function listCategories() {
   const { categories } = await fetchLlmsTxt();
 
@@ -282,288 +252,532 @@ async function listCategories() {
   return result;
 }
 
-/**
- * Refresh cache
- */
 async function refreshCache() {
   cache = { data: null, timestamp: 0 };
   await fetchLlmsTxt(true);
   return { status: "success", message: "Cache actualizado correctamente" };
 }
 
-// Create MCP server
-const server = new Server(
-  {
+function createMcpServer() {
+  const server = new McpServer({
     name: "DESY MCP Server",
     version: "1.0.0",
-  },
-  {
-    capabilities: {
-      tools: {},
-      resources: {},
-      prompts: {},
+  });
+
+  server.tool(
+    "get_component_code_html",
+    "Obtiene el código HTML de un componente de DESY",
+    {
+      component: {
+        type: "string",
+        description: "Nombre del componente (ej: 'botones', 'modal', 'formularios')",
+      },
     },
-  }
-);
+    async ({ component }) => ({
+      content: [{ type: "text", text: await getComponentCode("html", component) }],
+    })
+  );
 
-// Handle list tools
-server.setRequestHandler(ListToolsRequestSchema, async () => {
-  return {
-    tools: [
-      {
-        name: "get_component_code_html",
-        description: "Obtiene el código HTML de un componente de DESY",
-        inputSchema: {
-          type: "object",
-          properties: {
-            component: {
-              type: "string",
-              description: "Nombre del componente (ej: 'botones', 'modal', 'formularios')",
-            },
-          },
-          required: ["component"],
-        },
+  server.tool(
+    "get_component_code_nunjucks",
+    "Obtiene el código Nunjucks de un componente de DESY",
+    {
+      component: {
+        type: "string",
+        description: "Nombre del componente (ej: 'botones', 'modal', 'formularios')",
       },
-      {
-        name: "get_component_code_nunjucks",
-        description: "Obtiene el código Nunjucks de un componente de DESY",
-        inputSchema: {
-          type: "object",
-          properties: {
-            component: {
-              type: "string",
-              description: "Nombre del componente (ej: 'botones', 'modal', 'formularios')",
-            },
-          },
-          required: ["component"],
-        },
-      },
-      {
-        name: "get_component_code_angular",
-        description: "Obtiene el código Angular de un componente de DESY",
-        inputSchema: {
-          type: "object",
-          properties: {
-            component: {
-              type: "string",
-              description: "Nombre del componente (ej: 'botones', 'modal', 'formularios')",
-            },
-          },
-          required: ["component"],
-        },
-      },
-      {
-        name: "get_component_props",
-        description: "Obtiene los parámetros y propiedades configurables de un componente de DESY",
-        inputSchema: {
-          type: "object",
-          properties: {
-            component: {
-              type: "string",
-              description: "Nombre del componente",
-            },
-          },
-          required: ["component"],
-        },
-      },
-      {
-        name: "search_components",
-        description: "Busca componentes de DESY por nombre o descripción",
-        inputSchema: {
-          type: "object",
-          properties: {
-            query: {
-              type: "string",
-              description: "Término de búsqueda",
-            },
-          },
-          required: ["query"],
-        },
-      },
-      {
-        name: "get_guideline",
-        description: "Obtiene guías de estilo, documentación de componentes o patrones",
-        inputSchema: {
-          type: "object",
-          properties: {
-            section: {
-              type: "string",
-              description: "Sección a consultar (ej: 'estilos', 'componentes', 'patrones', 'accesibilidad')",
-            },
-          },
-          required: ["section"],
-        },
-      },
-      {
-        name: "list_categories",
-        description: "Lista todas las categorías y componentes disponibles en DESY",
-        inputSchema: {
-          type: "object",
-          properties: {},
-        },
-      },
-      {
-        name: "refresh_cache",
-        description: "Fuerza la actualización del cache de llms.txt",
-        inputSchema: {
-          type: "object",
-          properties: {},
-        },
-      },
-    ],
-  };
-});
+    },
+    async ({ component }) => ({
+      content: [{ type: "text", text: await getComponentCode("nunjucks", component) }],
+    })
+  );
 
-// Handle tool calls
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  const { name, arguments: args } = request.params;
+  server.tool(
+    "get_component_code_angular",
+    "Obtiene el código Angular de un componente de DESY",
+    {
+      component: {
+        type: "string",
+        description: "Nombre del componente (ej: 'botones', 'modal', 'formularios')",
+      },
+    },
+    async ({ component }) => ({
+      content: [{ type: "text", text: await getComponentCode("angular", component) }],
+    })
+  );
 
-  try {
-    let result;
+  server.tool(
+    "get_component_props",
+    "Obtiene los parámetros y propiedades configurables de un componente de DESY",
+    {
+      component: {
+        type: "string",
+        description: "Nombre del componente",
+      },
+    },
+    async ({ component }) => ({
+      content: [{ type: "text", text: JSON.stringify(await getComponentProps(component), null, 2) }],
+    })
+  );
 
-    switch (name) {
-      case "get_component_code_html":
-        result = await getComponentCode("html", args.component);
-        break;
-      case "get_component_code_nunjucks":
-        result = await getComponentCode("nunjucks", args.component);
-        break;
-      case "get_component_code_angular":
-        result = await getComponentCode("angular", args.component);
-        break;
-      case "get_component_props":
-        result = await getComponentProps(args.component);
-        break;
-      case "search_components":
-        result = await searchComponents(args.query);
-        break;
-      case "get_guideline":
-        result = await getGuideline(args.section);
-        break;
-      case "list_categories":
-        result = await listCategories();
-        break;
-      case "refresh_cache":
-        result = await refreshCache();
-        break;
-      default:
-        throw new Error(`Unknown tool: ${name}`);
+  server.tool(
+    "search_components",
+    "Busca componentes de DESY por nombre o descripción",
+    {
+      query: {
+        type: "string",
+        description: "Término de búsqueda",
+      },
+    },
+    async ({ query }) => ({
+      content: [{ type: "text", text: JSON.stringify(await searchComponents(query), null, 2) }],
+    })
+  );
+
+  server.tool(
+    "get_guideline",
+    "Obtiene guías de estilo, documentación de componentes o patrones",
+    {
+      section: {
+        type: "string",
+        description: "Sección a consultar (ej: 'estilos', 'componentes', 'patrones', 'accesibilidad')",
+      },
+    },
+    async ({ section }) => ({
+      content: [{ type: "text", text: await getGuideline(section) }],
+    })
+  );
+
+  server.tool(
+    "list_categories",
+    "Lista todas las categorías y componentes disponibles en DESY",
+    {},
+    async () => ({
+      content: [{ type: "text", text: JSON.stringify(await listCategories(), null, 2) }],
+    })
+  );
+
+  server.tool(
+    "refresh_cache",
+    "Fuerza la actualización del cache de llms.txt",
+    {},
+    async () => ({
+      content: [{ type: "text", text: JSON.stringify(await refreshCache(), null, 2) }],
+    })
+  );
+
+  return server;
+}
+
+function generateInstallationHTML() {
+  const clients = [
+    {
+      name: "Cursor",
+      icon: "https://www.google.com/s2/favicons?domain=cursor.com&sz=64",
+      instructions: `Añadir a <code>~/.cursor/mcp.json</code> o <code>.cursor/mcp.json</code> (proyecto-específico):`,
+      config: {
+        mcpServers: {
+          "DESY MCP Server": {
+            url: SERVER_URL
+          }
+        }
+      }
+    },
+    {
+      name: "VS Code",
+      icon: "https://www.google.com/s2/favicons?domain=code.visualstudio.com&sz=64",
+      instructions: `Añadir al <code>settings.json</code> de VS Code:`,
+      config: {
+        mcp: {
+          servers: {
+            "DESY MCP Server": {
+              type: "http",
+              url: SERVER_URL
+            }
+          }
+        }
+      }
+    },
+    {
+      name: "Claude Desktop / Claude.ai",
+      icon: "https://www.google.com/s2/favicons?domain=claude.ai&sz=64",
+      instructions: `Ir a <strong>Settings → Connectors → Add Custom Connector</strong> y rellenar:
+      <ul>
+        <li><strong>Name</strong>: DESY MCP Server</li>
+        <li><strong>URL</strong>: ${SERVER_URL}</li>
+      </ul>`,
+      config: null
+    },
+    {
+      name: "Claude Code",
+      icon: "https://www.google.com/s2/favicons?domain=claude.ai&sz=64",
+      instructions: `Ejecutar en terminal:`,
+      command: `claude mcp add --transport http "DESY-MCP-Server" ${SERVER_URL}`
+    },
+    {
+      name: "Windsurf",
+      icon: "https://www.google.com/s2/favicons?domain=codeium.com&sz=64",
+      instructions: `Añadir a la configuración MCP de Windsurf:`,
+      config: {
+        mcpServers: {
+          "DESY MCP Server": {
+            serverUrl: SERVER_URL
+          }
+        }
+      }
+    }
+  ];
+
+  const clientCards = clients.map(client => {
+    let configSection = '';
+    if (client.config) {
+      configSection = `<pre><code>${JSON.stringify(client.config, null, 2)}</code></pre>`;
+    }
+    if (client.command) {
+      configSection = `<pre><code class="language-bash">${client.command}</code></pre>`;
     }
 
-    return {
-      content: [
-        {
-          type: "text",
-          text: typeof result === "string" ? result : JSON.stringify(result, null, 2),
-        },
-      ],
-    };
+    return `
+      <div class="client-card">
+        <div class="client-header">
+          <img src="${client.icon}" alt="${client.name}" class="client-icon">
+          <h3>${client.name}</h3>
+        </div>
+        <div class="client-instructions">
+          <p>${client.instructions}</p>
+          ${configSection}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DESY MCP Server - Instalación</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      color: #e0e0e0;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      font-size: 1.2rem;
+      color: #a0a0a0;
+    }
+    
+    .server-info {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+    
+    .server-url {
+      font-family: monospace;
+      font-size: 1.1rem;
+      color: #4fc3f7;
+      background: rgba(79, 195, 247, 0.1);
+      padding: 10px 20px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+    
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 30px;
+      color: #fff;
+      text-align: center;
+    }
+    
+    .clients-grid {
+      display: grid;
+      gap: 20px;
+    }
+    
+    .client-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 25px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .client-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .client-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .client-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+    }
+    
+    .client-header h3 {
+      font-size: 1.3rem;
+      color: #fff;
+    }
+    
+    .client-instructions p {
+      margin-bottom: 15px;
+      color: #b0b0b0;
+    }
+    
+    .client-instructions ul {
+      margin: 10px 0 15px 20px;
+      color: #b0b0b0;
+    }
+    
+    pre {
+      background: #0d1117;
+      border-radius: 8px;
+      padding: 15px;
+      overflow-x: auto;
+    }
+    
+    code {
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.9rem;
+      color: #79c0ff;
+    }
+    
+    .tools-section {
+      margin-top: 50px;
+      padding-top: 40px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .tool-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 15px;
+    }
+    
+    .tool-card h4 {
+      color: #4fc3f7;
+      font-family: monospace;
+      margin-bottom: 8px;
+    }
+    
+    .tool-card p {
+      font-size: 0.9rem;
+      color: #909090;
+    }
+    
+    footer {
+      margin-top: 60px;
+      text-align: center;
+      color: #606060;
+      font-size: 0.9rem;
+    }
+    
+    footer a {
+      color: #4fc3f7;
+      text-decoration: none;
+    }
+    
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>DESY MCP Server</h1>
+      <p class="subtitle">Sistema de Diseño del Gobierno de Aragón</p>
+    </header>
+    
+    <div class="server-info">
+      <p>URL del servidor MCP:</p>
+      <div class="server-url">${SERVER_URL}</div>
+    </div>
+    
+    <h2>Instrucciones de Instalación</h2>
+    
+    <div class="clients-grid">
+      ${clientCards}
+    </div>
+    
+    <div class="tools-section">
+      <h2>Herramientas Disponibles</h2>
+      <div class="tools-grid">
+        <div class="tool-card">
+          <h4>get_component_code_html</h4>
+          <p>Obtiene el código HTML de un componente</p>
+        </div>
+        <div class="tool-card">
+          <h4>get_component_code_nunjucks</h4>
+          <p>Obtiene el código Nunjucks de un componente</p>
+        </div>
+        <div class="tool-card">
+          <h4>get_component_code_angular</h4>
+          <p>Obtiene el código Angular de un componente</p>
+        </div>
+        <div class="tool-card">
+          <h4>get_component_props</h4>
+          <p>Obtiene las propiedades configurables</p>
+        </div>
+        <div class="tool-card">
+          <h4>search_components</h4>
+          <p>Busca componentes por nombre o descripción</p>
+        </div>
+        <div class="tool-card">
+          <h4>get_guideline</h4>
+          <p>Obtiene guías de estilo y documentación</p>
+        </div>
+        <div class="tool-card">
+          <h4>list_categories</h4>
+          <p>Lista todas las categorías disponibles</p>
+        </div>
+        <div class="tool-card">
+          <h4>refresh_cache</h4>
+          <p>Actualiza el cache de documentación</p>
+        </div>
+      </div>
+    </div>
+    
+    <footer>
+      <p>Desarrollado para el <a href="https://desy.aragon.es" target="_blank">Sistema de Diseño DESY</a> del <a href="https://www.aragon.es" target="_blank">Gobierno de Aragón</a></p>
+    </footer>
+  </div>
+</body>
+</html>`;
+}
+
+app.get("/", (req, res) => {
+  res.setHeader("Content-Type", "text/html");
+  res.setHeader("Cache-Control", "no-cache");
+  res.send(generateInstallationHTML());
+});
+
+app.get("/health", (req, res) => {
+  res.json({ status: "ok", server: "DESY MCP Server", version: "1.0.0" });
+});
+
+const sessions = new Map();
+const SESSION_TTL_MS = 30 * 60 * 1000;
+
+function cleanupSessions() {
+  const now = Date.now();
+  for (const [sessionId, session] of sessions.entries()) {
+    if (now - session.lastAccess > SESSION_TTL_MS) {
+      sessions.delete(sessionId);
+    }
+  }
+}
+
+setInterval(cleanupSessions, 5 * 60 * 1000);
+
+function generateSessionId() {
+  return crypto.randomUUID();
+}
+
+app.post("/mcp", async (req, res) => {
+  try {
+    let sessionId = req.headers["mcp-session-id"];
+    let session = sessionId ? sessions.get(sessionId) : null;
+    
+    if (!session) {
+      sessionId = generateSessionId();
+      const transport = new StreamableHTTPServerTransport({
+        sessionIdGenerator: () => sessionId,
+      });
+      const server = createMcpServer();
+      await server.connect(transport);
+      
+      session = { transport, server, lastAccess: Date.now() };
+      sessions.set(sessionId, session);
+    } else {
+      session.lastAccess = Date.now();
+    }
+    
+    res.setHeader("mcp-session-id", sessionId);
+    await session.transport.handleRequest(req, res);
   } catch (error) {
-    return {
-      content: [
-        {
-          type: "text",
-          text: `Error: ${error.message}`,
-        },
-      ],
-      isError: true,
-    };
+    console.error("MCP POST error:", error);
+    if (!res.headersSent) {
+      res.status(500).json({ error: error.message });
+    }
   }
 });
 
-// Handle list resources
-server.setRequestHandler(ListResourcesRequestSchema, async () => {
-  return {
-    resources: [
-      {
-        uri: "desy://llms.txt",
-        name: "DESY Documentation Index",
-        description: "Índice completo de la documentación de DESY",
-        mimeType: "text/plain",
-      },
-    ],
-  };
-});
-
-// Handle read resource
-server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
-  const { uri } = request.params;
-
-  if (uri === "desy://llms.txt") {
-    const content = await fetchUrl(LLMS_TXT_URL);
-    return {
-      contents: [
-        {
-          uri: "desy://llms.txt",
-          mimeType: "text/plain",
-          text: content,
-        },
-      ],
-    };
+app.get("/mcp", async (req, res) => {
+  try {
+    const sessionId = req.headers["mcp-session-id"];
+    const session = sessionId ? sessions.get(sessionId) : null;
+    
+    if (!session) {
+      res.status(400).json({ error: "Session not found. Send a POST request first to initialize." });
+      return;
+    }
+    
+    session.lastAccess = Date.now();
+    await session.transport.handleRequest(req, res);
+  } catch (error) {
+    console.error("MCP GET error:", error);
+    if (!res.headersSent) {
+      res.status(500).json({ error: error.message });
+    }
   }
-
-  return {
-    contents: [
-      {
-        uri,
-        mimeType: "text/plain",
-        text: `Recurso no encontrado: ${uri}`,
-      },
-    ],
-  };
 });
 
-// Handle list prompts
-server.setRequestHandler(ListPromptsRequestSchema, async () => {
-  return {
-    prompts: [
-      {
-        name: "generate_component_page",
-        description: "Genera el código para una página con un componente DESY",
-        arguments: [
-          {
-            name: "component",
-            description: "Nombre del componente",
-            required: true,
-          },
-          {
-            name: "tech",
-            description: "Tecnología (html, nunjucks, angular)",
-            required: true,
-          },
-        ],
-      },
-    ],
-  };
-});
-
-// Handle get prompt
-server.setRequestHandler(GetPromptRequestSchema, async (request) => {
-  const { name, arguments: args } = request.params;
-
-  if (name === "generate_component_page") {
-    const code = await getComponentCode(args.tech, args.component);
-    return {
-      description: `Plantilla para generar página con componente ${args.component}`,
-      messages: [
-        {
-          role: "user",
-          content: {
-            type: "text",
-            text: `Genera una página completa usando el siguiente código de DESY (${args.tech}):\n\n${code}\n\nLa página debe ser accesible y seguir las guías de estilo de DESY.`,
-          },
-        },
-      ],
-    };
+app.delete("/mcp", async (req, res) => {
+  const sessionId = req.headers["mcp-session-id"];
+  if (sessionId && sessions.has(sessionId)) {
+    sessions.delete(sessionId);
   }
-
-  return {
-    messages: [],
-  };
+  res.status(200).json({ message: "Session closed" });
 });
 
-// Run server
-const transport = new StdioServerTransport();
-await server.connect(transport);
-
-console.log("DESY MCP Server running on stdio...");
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`DESY MCP Server running on http://0.0.0.0:${PORT}`);
+  console.log(`MCP endpoint: ${SERVER_URL}/mcp`);
+  console.log(`Installation guide: ${SERVER_URL}`);
+});
