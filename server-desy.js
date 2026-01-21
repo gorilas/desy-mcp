@@ -14,7 +14,10 @@ import https from "https";
 import http from "http";
 import crypto from "crypto";
 
+import cors from "cors";
+
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 const PORT = 5000;
@@ -739,6 +742,7 @@ app.post("/mcp", async (req, res) => {
     }
     
     res.setHeader("mcp-session-id", sessionId);
+    res.setHeader("Access-Control-Expose-Headers", "mcp-session-id");
     await session.transport.handleRequest(req, res);
   } catch (error) {
     console.error("MCP POST error:", error);
