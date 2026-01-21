@@ -643,7 +643,7 @@ function generateInstallationHTML() {
     
     <div class="server-info">
       <p>URL del servidor MCP:</p>
-      <div class="server-url">${SERVER_URL}</div>
+      <div class="server-url">${SERVER_URL}/mcp</div>
     </div>
     
     <h2>Instrucciones de Instalación</h2>
