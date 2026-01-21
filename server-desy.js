@@ -315,10 +315,14 @@ function createMcpServer() {
     "get_component_code_html",
     "Obtiene el código HTML de un componente de DESY",
     {
-      component: {
-        type: "string",
-        description: "Nombre del componente (ej: 'botones', 'modal', 'formularios')",
+      type: "object",
+      properties: {
+        component: {
+          type: "string",
+          description: "Nombre del componente (ej: 'botones', 'modal', 'formularios')",
+        },
       },
+      required: ["component"],
     },
     async ({ component }) => ({
       content: [{ type: "text", text: await getComponentCode("html", component) }],
@@ -329,10 +333,14 @@ function createMcpServer() {
     "get_component_code_nunjucks",
     "Obtiene el código Nunjucks de un componente de DESY",
     {
-      component: {
-        type: "string",
-        description: "Nombre del componente (ej: 'botones', 'modal', 'formularios')",
+      type: "object",
+      properties: {
+        component: {
+          type: "string",
+          description: "Nombre del componente (ej: 'botones', 'modal', 'formularios')",
+        },
       },
+      required: ["component"],
     },
     async ({ component }) => ({
       content: [{ type: "text", text: await getComponentCode("nunjucks", component) }],
@@ -343,10 +351,14 @@ function createMcpServer() {
     "get_component_code_angular",
     "Obtiene el código Angular de un componente de DESY",
     {
-      component: {
-        type: "string",
-        description: "Nombre del componente (ej: 'botones', 'modal', 'formularios')",
+      type: "object",
+      properties: {
+        component: {
+          type: "string",
+          description: "Nombre del componente (ej: 'botones', 'modal', 'formularios')",
+        },
       },
+      required: ["component"],
     },
     async ({ component }) => ({
       content: [{ type: "text", text: await getComponentCode("angular", component) }],
@@ -357,10 +369,14 @@ function createMcpServer() {
     "get_component_props",
     "Obtiene los parámetros y propiedades configurables de un componente de DESY",
     {
-      component: {
-        type: "string",
-        description: "Nombre del componente",
+      type: "object",
+      properties: {
+        component: {
+          type: "string",
+          description: "Nombre del componente",
+        },
       },
+      required: ["component"],
     },
     async ({ component }) => ({
       content: [{ type: "text", text: JSON.stringify(await getComponentProps(component), null, 2) }],
@@ -371,10 +387,14 @@ function createMcpServer() {
     "search_components",
     "Busca componentes de DESY por nombre o descripción",
     {
-      query: {
-        type: "string",
-        description: "Término de búsqueda",
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          description: "Término de búsqueda",
+        },
       },
+      required: ["query"],
     },
     async ({ query }) => ({
       content: [{ type: "text", text: JSON.stringify(await searchComponents(query), null, 2) }],
@@ -385,10 +405,14 @@ function createMcpServer() {
     "get_guideline",
     "Obtiene guías de estilo, documentación de componentes o patrones",
     {
-      section: {
-        type: "string",
-        description: "Sección a consultar (ej: 'estilos', 'componentes', 'patrones', 'accesibilidad')",
+      type: "object",
+      properties: {
+        section: {
+          type: "string",
+          description: "Sección a consultar (ej: 'estilos', 'componentes', 'patrones', 'accesibilidad')",
+        },
       },
+      required: ["section"],
     },
     async ({ section }) => ({
       content: [{ type: "text", text: await getGuideline(section) }],
@@ -398,7 +422,10 @@ function createMcpServer() {
   server.tool(
     "list_categories",
     "Lista todas las categorías y componentes disponibles en DESY",
-    {},
+    {
+      type: "object",
+      properties: {},
+    },
     async () => ({
       content: [{ type: "text", text: JSON.stringify(await listCategories(), null, 2) }],
     })
@@ -407,7 +434,10 @@ function createMcpServer() {
   server.tool(
     "refresh_cache",
     "Fuerza la actualización del cache de llms.txt",
-    {},
+    {
+      type: "object",
+      properties: {},
+    },
     async () => ({
       content: [{ type: "text", text: JSON.stringify(await refreshCache(), null, 2) }],
     })
