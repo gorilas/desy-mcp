@@ -81,12 +81,13 @@ function parseLlmsTxt(content) {
       currentCategory = stripped.slice(4).trim();
     } else if (stripped.startsWith("- ")) {
       const link = parseMarkdownLink(stripped.slice(2));
-      if (link && link.url.includes("/componente-") && !link.url.endsWith(".md")) {
+      if (link && link.url.includes("/componente-")) {
         const componentName = link.text;
-        const hasHtml = link.url.includes("-codigo");
-        const hasNunjucks = link.url.toLowerCase().includes("nunjucks");
-        const hasAngular = link.url.toLowerCase().includes("angular");
-        const hasProps = link.url.toLowerCase().includes("propiedades") || link.url.toLowerCase().includes("props");
+        const urlLower = link.url.toLowerCase();
+        const hasHtml = urlLower.includes("-codigo") && !urlLower.includes("-angular");
+        const hasNunjucks = urlLower.includes("nunjucks");
+        const hasAngular = urlLower.includes("angular");
+        const hasProps = urlLower.includes("propiedades") || urlLower.includes("props");
 
         const component = {
           name: componentName,
@@ -100,7 +101,9 @@ function parseLlmsTxt(content) {
         };
 
         const key = componentName.toLowerCase();
-        components[key] = component;
+        if (!components[key]) {
+          components[key] = component;
+        }
 
         if (currentCategory && categories[currentCategory]) {
           categories[currentCategory].components.push(component);
@@ -135,6 +138,12 @@ async function fetchLlmsTxt(forceRefresh = false) {
 
 async function getComponentCode(tech, component) {
   const { components } = await fetchLlmsTxt();
+  
+  if (!component || typeof component !== 'string') {
+    const available = Object.keys(components).slice(0, 15);
+    return `Error: Debes especificar un nombre de componente.\n\nComponentes disponibles:\n- ${available.join("\n- ")}`;
+  }
+  
   const key = component.toLowerCase().trim();
 
   if (!components[key]) {
@@ -154,6 +163,11 @@ async function getComponentCode(tech, component) {
 
 async function getComponentProps(component) {
   const { components } = await fetchLlmsTxt();
+  
+  if (!component || typeof component !== 'string') {
+    return { error: "Debes especificar un nombre de componente" };
+  }
+  
   const key = component.toLowerCase().trim();
 
   if (!components[key]) {
@@ -191,6 +205,19 @@ async function getComponentProps(component) {
 
 async function searchComponents(query) {
   const { components } = await fetchLlmsTxt();
+  
+  if (!query || typeof query !== 'string') {
+    return Object.values(components).slice(0, 20).map(comp => ({
+      name: comp.name,
+      description: comp.description,
+      category: comp.category,
+      url: comp.url,
+      hasHtml: comp.hasHtml,
+      hasNunjucks: comp.hasNunjucks,
+      hasAngular: comp.hasAngular,
+    }));
+  }
+  
   const queryLower = query.toLowerCase();
   const results = [];
 
@@ -217,6 +244,12 @@ async function searchComponents(query) {
 
 async function getGuideline(section) {
   const { categories } = await fetchLlmsTxt();
+  
+  if (!section || typeof section !== 'string') {
+    const available = Object.keys(categories);
+    return `Error: Debes especificar una sección.\n\nSecciones disponibles:\n- ${available.join("\n- ")}`;
+  }
+  
   const sectionLower = section.toLowerCase().trim();
 
   for (const [catName, category] of Object.entries(categories)) {
