@@ -49,9 +49,16 @@ El servidor HTTP se ejecuta en el puerto 5000 y proporciona:
 - Node.js 20+
 - @modelcontextprotocol/sdk
 - express
+- zod (para validación de schemas de herramientas)
+
+## Technical Notes
+
+- Los schemas de las herramientas MCP se definen usando Zod en lugar de JSON Schema
+- Esto es requerido por el SDK de MCP para que los parámetros se pasen correctamente a los handlers
 
 ## Recent Changes
 
+- Corregido paso de parámetros a herramientas MCP usando Zod schemas
 - Reorganizada estructura de archivos (todo en la raíz)
 - Convertido a servidor HTTP con Express (puerto 5000)
 - Añadida página de instrucciones de instalación
