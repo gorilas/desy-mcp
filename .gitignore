@@ -1,0 +1,13 @@
+/attached_assets
+/tmp
+node_modules
+.replit
+.apt_history
+.bash_history
+.config
+.git
+.npm
+.python_history
+.upm
+replit.nix
+*.log
