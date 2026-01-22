@@ -401,11 +401,25 @@ function createMcpServer() {
 }
 
 function generateInstallationHTML() {
+  // Generate one-click install URLs
+  const vscodeConfig = {
+    name: "DESY MCP Server",
+    type: "http",
+    url: `${SERVER_URL}/mcp`
+  };
+  const vscodeInstallUrl = `vscode:mcp/install?${encodeURIComponent(JSON.stringify(vscodeConfig))}`;
+  
+  const cursorConfig = {
+    url: `${SERVER_URL}/mcp`
+  };
+  const cursorInstallUrl = `cursor://anysphere.cursor-deeplink/mcp/install?name=${encodeURIComponent("DESY MCP Server")}&config=${Buffer.from(JSON.stringify(cursorConfig)).toString('base64')}`;
+
   const clients = [
     {
       name: "VS Code",
       icon: "https://www.google.com/s2/favicons?domain=code.visualstudio.com&sz=64",
       instructions: `Añadir al <code>settings.json</code> de VS Code:`,
+      installUrl: vscodeInstallUrl,
       config: {
         mcp: {
           servers: {
@@ -421,6 +435,7 @@ function generateInstallationHTML() {
       name: "Cursor",
       icon: "https://www.google.com/s2/favicons?domain=cursor.com&sz=64",
       instructions: `Añadir a <code>~/.cursor/mcp.json</code> o <code>.cursor/mcp.json</code> (proyecto-específico):`,
+      installUrl: cursorInstallUrl,
       config: {
         mcpServers: {
           "DESY MCP Server": {
@@ -467,12 +482,18 @@ function generateInstallationHTML() {
     if (client.command) {
       configSection = `<pre><code class="language-bash">${client.command}</code></pre>`;
     }
+    
+    let installButton = '';
+    if (client.installUrl) {
+      installButton = `<a href="${client.installUrl}" class="install-button">Instalar Ahora</a>`;
+    }
 
     return `
       <div class="client-card">
         <div class="client-header">
           <img src="${client.icon}" alt="${client.name}" class="client-icon">
           <h3>${client.name}</h3>
+          ${installButton}
         </div>
         <div class="client-instructions">
           <p>${client.instructions}</p>
@@ -589,6 +610,24 @@ function generateInstallationHTML() {
     .client-header h3 {
       font-size: 1.3rem;
       color: #fff;
+      flex-grow: 1;
+    }
+    
+    .install-button {
+      background: #22c55e;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: background 0.2s, transform 0.2s;
+      white-space: nowrap;
+    }
+    
+    .install-button:hover {
+      background: #16a34a;
+      transform: translateY(-1px);
     }
     
     .client-instructions p {
