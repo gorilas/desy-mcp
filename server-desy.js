@@ -87,8 +87,9 @@ function parseLlmsTxt(content) {
           components: [],
         };
       }
-    } else if (stripped.startsWith("- ")) {
-      const link = parseMarkdownLink(stripped.slice(2));
+    } else if (stripped.startsWith("- ") || stripped.startsWith("  - ")) {
+      const linkText = stripped.replace(/^-\s*/, "").replace(/^\s*-\s*/, "");
+      const link = parseMarkdownLink(linkText);
       if (link && link.url.includes("/componente-")) {
         const componentName = link.text;
         const urlLower = link.url.toLowerCase();
@@ -148,15 +149,15 @@ async function getComponentCode(tech, component) {
   const { components } = await fetchLlmsTxt();
   
   if (!component || typeof component !== 'string') {
-    const available = Object.keys(components).slice(0, 15);
-    return `Error: Debes especificar un nombre de componente.\n\nComponentes disponibles:\n- ${available.join("\n- ")}`;
+    const available = Object.keys(components);
+    return `Error: Debes especificar un nombre de componente.\n\nComponentes disponibles (${available.length} total):\n- ${available.join("\n- ")}`;
   }
   
   const key = component.toLowerCase().trim();
 
   if (!components[key]) {
-    const available = Object.keys(components).slice(0, 10);
-    return `Componente '${component}' no encontrado.\n\nComponentes disponibles:\n- ${available.join("\n- ")}`;
+    const available = Object.keys(components);
+    return `Componente '${component}' no encontrado.\n\nComponentes disponibles (${available.length} total):\n- ${available.join("\n- ")}`;
   }
 
   const comp = components[key];
