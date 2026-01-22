@@ -58,6 +58,8 @@ El servidor HTTP se ejecuta en el puerto 5000 y proporciona:
 
 ## Recent Changes
 
+- **2026-01-22**: Corregido parsing de componentes en `parseLlmsTxt` para procesar correctamente enlaces indentados del llms.txt (ahora detecta todos los componentes de todas las subcategorías)
+- **2026-01-22**: Eliminado límite artificial de 10 componentes en mensajes de error - ahora muestra la lista completa
 - Corregido paso de parámetros a herramientas MCP usando Zod schemas
 - Reorganizada estructura de archivos (todo en la raíz)
 - Convertido a servidor HTTP con Express (puerto 5000)
