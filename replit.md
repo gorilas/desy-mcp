@@ -58,8 +58,12 @@ El servidor HTTP se ejecuta en el puerto 5000 y proporciona:
 
 ## Recent Changes
 
-- **2026-01-22**: Corregido parsing de componentes en `parseLlmsTxt` para procesar correctamente enlaces indentados del llms.txt (ahora detecta todos los componentes de todas las subcategorías)
-- **2026-01-22**: Eliminado límite artificial de 10 componentes en mensajes de error - ahora muestra la lista completa
+- **2026-01-30**: Mejorada búsqueda de componentes con función `findComponentKey()` para soportar aliases bidireccionales
+- **2026-01-30**: Las herramientas de código ahora devuelven snippets parseados listos para copiar en lugar de documentación completa
+- **2026-01-30**: Añadido parámetro `variant` para filtrar ejemplos por variante (ej: "primario", "deshabilitado")
+- **2026-01-30**: Soporte bilingüe español/inglés en búsqueda (button ↔ botón/botones)
+- **2026-01-22**: Corregido parsing de componentes en `parseLlmsTxt` para procesar correctamente enlaces indentados del llms.txt
+- **2026-01-22**: Eliminado límite artificial de 10 componentes en mensajes de error
 - Corregido paso de parámetros a herramientas MCP usando Zod schemas
 - Reorganizada estructura de archivos (todo en la raíz)
 - Convertido a servidor HTTP con Express (puerto 5000)
