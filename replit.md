@@ -58,6 +58,7 @@ El servidor HTTP se ejecuta en el puerto 5000 y proporciona:
 
 ## Recent Changes
 
+- **2026-01-30**: Añadida lista de variantes disponibles al inicio de la respuesta cuando no se especifica variante
 - **2026-01-30**: Mejorada búsqueda de componentes con función `findComponentKey()` para soportar aliases bidireccionales
 - **2026-01-30**: Las herramientas de código ahora devuelven snippets parseados listos para copiar en lugar de documentación completa
 - **2026-01-30**: Añadido parámetro `variant` para filtrar ejemplos por variante (ej: "primario", "deshabilitado")
