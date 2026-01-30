@@ -35,6 +35,157 @@ let cache = {
   timestamp: 0,
 };
 
+const COMPONENT_ALIASES = {
+  "button": ["button", "botón", "botones", "boton"],
+  "button-loader": ["button-loader", "botón cargando", "boton cargando", "loader button"],
+  "modal": ["modal", "ventana modal", "diálogo", "dialogo", "dialog"],
+  "input": ["input", "entrada", "campo", "text input", "campo de texto"],
+  "select": ["select", "selector", "desplegable", "dropdown"],
+  "checkbox": ["checkbox", "casilla", "casilla de verificación", "check"],
+  "radio": ["radio", "radio button", "botón de radio", "boton de radio"],
+  "accordion": ["accordion", "acordeón", "acordeon", "desplegable"],
+  "alert": ["alert", "alerta", "aviso", "notificación", "notificacion"],
+  "badge": ["badge", "insignia", "etiqueta"],
+  "breadcrumb": ["breadcrumb", "migas de pan", "breadcrumbs", "navegación"],
+  "card": ["card", "tarjeta", "cards", "tarjetas"],
+  "carousel": ["carousel", "carrusel", "slider"],
+  "dropdown": ["dropdown", "desplegable", "menú desplegable", "menu desplegable"],
+  "footer": ["footer", "pie de página", "pie de pagina"],
+  "header": ["header", "cabecera", "encabezado"],
+  "icon": ["icon", "icono", "icons", "iconos"],
+  "link": ["link", "enlace", "enlaces", "links"],
+  "list": ["list", "lista", "listas", "lists"],
+  "menu": ["menu", "menú", "navegación", "navegacion", "nav"],
+  "navbar": ["navbar", "barra de navegación", "navigation bar"],
+  "pagination": ["pagination", "paginación", "paginacion", "pager"],
+  "progress": ["progress", "progreso", "barra de progreso", "progress bar"],
+  "spinner": ["spinner", "cargando", "loading", "loader"],
+  "tab": ["tab", "tabs", "pestaña", "pestañas", "pestana", "pestanas"],
+  "table": ["table", "tabla", "tablas", "tables"],
+  "tag": ["tag", "etiqueta", "tags", "etiquetas"],
+  "textarea": ["textarea", "área de texto", "area de texto", "text area"],
+  "toast": ["toast", "notificación", "notificacion", "mensaje"],
+  "tooltip": ["tooltip", "descripción emergente", "hint", "ayuda"],
+  "form": ["form", "formulario", "formularios", "forms"],
+  "search": ["search", "búsqueda", "busqueda", "buscador"],
+  "avatar": ["avatar", "foto de perfil", "imagen de usuario"],
+  "switch": ["switch", "interruptor", "toggle"],
+  "stepper": ["stepper", "pasos", "wizard", "asistente"],
+  "sidebar": ["sidebar", "barra lateral", "menú lateral", "menu lateral"],
+  "divider": ["divider", "divisor", "separador", "línea", "linea"],
+  "chip": ["chip", "chips", "etiqueta pequeña"],
+  "date-picker": ["date-picker", "datepicker", "selector de fecha", "calendario", "calendar"],
+  "file-upload": ["file-upload", "subir archivo", "upload", "carga de archivos"],
+  "autocomplete": ["autocomplete", "autocompletar", "sugerencias"],
+};
+
+function normalizeComponentName(input) {
+  if (!input || typeof input !== 'string') return null;
+  
+  const normalized = input.toLowerCase().trim()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  
+  for (const [canonical, aliases] of Object.entries(COMPONENT_ALIASES)) {
+    for (const alias of aliases) {
+      const normalizedAlias = alias.toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      if (normalizedAlias === normalized || normalized.includes(normalizedAlias) || normalizedAlias.includes(normalized)) {
+        return canonical;
+      }
+    }
+  }
+  
+  return normalized;
+}
+
+function parseCodeBlocks(markdown, format = 'html') {
+  const examples = [];
+  const lines = markdown.split('\n');
+  
+  let currentExample = null;
+  let inCodeBlock = false;
+  let codeBlockType = null;
+  let codeBuffer = [];
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    
+    if (line.match(/^###\s+(.+)\s*\[#\]/)) {
+      if (currentExample && (currentExample.html || currentExample.nunjucks)) {
+        examples.push(currentExample);
+      }
+      const title = line.match(/^###\s+(.+)\s*\[#\]/)[1].trim();
+      currentExample = { title, html: null, nunjucks: null, description: '' };
+    }
+    else if (line.match(/^###\s+(.+)/)) {
+      if (currentExample && (currentExample.html || currentExample.nunjucks)) {
+        examples.push(currentExample);
+      }
+      const title = line.match(/^###\s+(.+)/)[1].trim();
+      currentExample = { title, html: null, nunjucks: null, description: '' };
+    }
+    
+    if (line.startsWith('```html')) {
+      inCodeBlock = true;
+      codeBlockType = 'html';
+      codeBuffer = [];
+    } else if (line.startsWith('```js') || line.startsWith('```javascript')) {
+      inCodeBlock = true;
+      codeBlockType = 'nunjucks';
+      codeBuffer = [];
+    } else if (line === '```' && inCodeBlock) {
+      if (currentExample) {
+        const code = codeBuffer.join('\n').trim();
+        if (codeBlockType === 'html') {
+          currentExample.html = code;
+        } else if (codeBlockType === 'nunjucks') {
+          currentExample.nunjucks = code;
+        }
+      }
+      inCodeBlock = false;
+      codeBlockType = null;
+      codeBuffer = [];
+    } else if (inCodeBlock) {
+      codeBuffer.push(line);
+    }
+  }
+  
+  if (currentExample && (currentExample.html || currentExample.nunjucks)) {
+    examples.push(currentExample);
+  }
+  
+  return examples;
+}
+
+function formatCodeOutput(examples, format = 'html', variant = null) {
+  if (variant) {
+    const variantLower = variant.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const filtered = examples.filter(ex => {
+      const titleNorm = ex.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      return titleNorm.includes(variantLower) || variantLower.includes(titleNorm);
+    });
+    
+    if (filtered.length > 0) {
+      examples = filtered;
+    }
+  }
+  
+  const output = [];
+  
+  for (const example of examples) {
+    const code = format === 'html' ? example.html : example.nunjucks;
+    if (code) {
+      output.push(`### ${example.title}\n\`\`\`${format === 'html' ? 'html' : 'js'}\n${code}\n\`\`\``);
+    }
+  }
+  
+  if (output.length === 0) {
+    return `No se encontraron ejemplos de código ${format.toUpperCase()} para este componente.`;
+  }
+  
+  return output.join('\n\n');
+}
+
 function fetchUrl(url) {
   return new Promise((resolve, reject) => {
     const protocol = url.startsWith("https") ? https : http;
@@ -145,7 +296,7 @@ async function fetchLlmsTxt(forceRefresh = false) {
   }
 }
 
-async function getComponentCode(tech, component) {
+async function getComponentCode(tech, component, variant = null) {
   const { components } = await fetchLlmsTxt();
   
   if (!component || typeof component !== 'string') {
@@ -153,20 +304,72 @@ async function getComponentCode(tech, component) {
     return `Error: Debes especificar un nombre de componente.\n\nComponentes disponibles (${available.length} total):\n- ${available.join("\n- ")}`;
   }
   
-  const key = component.toLowerCase().trim();
+  const normalizedName = normalizeComponentName(component);
+  let key = normalizedName || component.toLowerCase().trim();
+
+  if (!components[key]) {
+    const keyWithoutS = key.replace(/s$/, '');
+    if (components[keyWithoutS]) {
+      key = keyWithoutS;
+    } else {
+      for (const compKey of Object.keys(components)) {
+        if (compKey.includes(key) || key.includes(compKey)) {
+          key = compKey;
+          break;
+        }
+      }
+    }
+  }
 
   if (!components[key]) {
     const available = Object.keys(components);
-    return `Componente '${component}' no encontrado.\n\nComponentes disponibles (${available.length} total):\n- ${available.join("\n- ")}`;
+    const suggestions = available.filter(k => 
+      k.includes(key.substring(0, 3)) || key.includes(k.substring(0, 3))
+    ).slice(0, 5);
+    
+    let response = `Componente '${component}' no encontrado.`;
+    if (suggestions.length > 0) {
+      response += `\n\n¿Quizás quisiste decir?\n- ${suggestions.join("\n- ")}`;
+    }
+    response += `\n\nComponentes disponibles (${available.length} total):\n- ${available.slice(0, 20).join("\n- ")}`;
+    if (available.length > 20) {
+      response += `\n... y ${available.length - 20} más`;
+    }
+    return response;
   }
 
   const comp = components[key];
 
+  let codeUrl = comp.url;
+  if (!codeUrl.includes('-codigo')) {
+    codeUrl = codeUrl.replace('.html.md', '-codigo.html.md');
+  }
+  
+  if (tech === 'angular' && !codeUrl.includes('-angular')) {
+    codeUrl = codeUrl.replace('-codigo.html.md', '-codigo-angular.html.md');
+  }
+
   try {
-    const content = await fetchUrl(comp.url);
-    return content;
+    const content = await fetchUrl(codeUrl);
+    
+    const examples = parseCodeBlocks(content, tech === 'nunjucks' ? 'nunjucks' : 'html');
+    
+    if (examples.length === 0) {
+      return `No se encontraron ejemplos de código para '${comp.name}'.\n\nContenido disponible en: ${codeUrl}`;
+    }
+    
+    const format = tech === 'nunjucks' ? 'nunjucks' : 'html';
+    const header = `## ${comp.name} - Código ${format.toUpperCase()}\n\n`;
+    const codeOutput = formatCodeOutput(examples, format, variant);
+    
+    return header + codeOutput;
   } catch (error) {
-    return `Error al obtener el código: ${error.message}`;
+    try {
+      const fallbackContent = await fetchUrl(comp.url);
+      return `No se pudo obtener la página de código. Documentación disponible:\n\n${fallbackContent.substring(0, 2000)}...`;
+    } catch {
+      return `Error al obtener el código: ${error.message}`;
+    }
   }
 }
 
@@ -315,34 +518,37 @@ function createMcpServer() {
 
   server.tool(
     "get_component_code_html",
-    "Obtiene el código HTML de un componente de DESY",
+    "Obtiene snippets de código HTML listos para copiar y usar de un componente DESY. Soporta nombres en español e inglés (ej: 'button' o 'botón'). Devuelve ejemplos de código por variante.",
     {
-      component: z.string().describe("Nombre del componente (ej: 'botones', 'modal', 'formularios')"),
+      component: z.string().describe("Nombre del componente en español o inglés (ej: 'button', 'botón', 'modal', 'alert')"),
+      variant: z.string().optional().describe("Variante específica del componente (ej: 'primario', 'deshabilitado', 'hover'). Si no se especifica, devuelve todos los ejemplos."),
     },
-    async ({ component }) => ({
-      content: [{ type: "text", text: await getComponentCode("html", component) }],
+    async ({ component, variant }) => ({
+      content: [{ type: "text", text: await getComponentCode("html", component, variant) }],
     })
   );
 
   server.tool(
     "get_component_code_nunjucks",
-    "Obtiene el código Nunjucks de un componente de DESY",
+    "Obtiene snippets de código Nunjucks/macros listos para copiar y usar de un componente DESY. Soporta nombres en español e inglés. Devuelve ejemplos de código por variante.",
     {
-      component: z.string().describe("Nombre del componente (ej: 'botones', 'modal', 'formularios')"),
+      component: z.string().describe("Nombre del componente en español o inglés (ej: 'button', 'botón', 'modal', 'alert')"),
+      variant: z.string().optional().describe("Variante específica del componente (ej: 'primario', 'deshabilitado', 'hover'). Si no se especifica, devuelve todos los ejemplos."),
     },
-    async ({ component }) => ({
-      content: [{ type: "text", text: await getComponentCode("nunjucks", component) }],
+    async ({ component, variant }) => ({
+      content: [{ type: "text", text: await getComponentCode("nunjucks", component, variant) }],
     })
   );
 
   server.tool(
     "get_component_code_angular",
-    "Obtiene el código Angular de un componente de DESY",
+    "Obtiene snippets de código Angular listos para copiar y usar de un componente DESY. Soporta nombres en español e inglés. Devuelve ejemplos de código por variante.",
     {
-      component: z.string().describe("Nombre del componente (ej: 'botones', 'modal', 'formularios')"),
+      component: z.string().describe("Nombre del componente en español o inglés (ej: 'button', 'botón', 'modal', 'alert')"),
+      variant: z.string().optional().describe("Variante específica del componente (ej: 'primario', 'deshabilitado', 'hover'). Si no se especifica, devuelve todos los ejemplos."),
     },
-    async ({ component }) => ({
-      content: [{ type: "text", text: await getComponentCode("angular", component) }],
+    async ({ component, variant }) => ({
+      content: [{ type: "text", text: await getComponentCode("angular", component, variant) }],
     })
   );
 
