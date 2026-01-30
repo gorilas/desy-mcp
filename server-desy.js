@@ -98,6 +98,48 @@ function normalizeComponentName(input) {
   return normalized;
 }
 
+function findComponentKey(components, searchTerm) {
+  if (!searchTerm || typeof searchTerm !== 'string') return null;
+  
+  const normalized = searchTerm.toLowerCase().trim()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  
+  if (components[normalized]) {
+    return normalized;
+  }
+  
+  const canonicalName = normalizeComponentName(searchTerm);
+  
+  for (const [canonical, aliases] of Object.entries(COMPONENT_ALIASES)) {
+    const isMatch = canonical === canonicalName || aliases.some(alias => {
+      const normalizedAlias = alias.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      return normalizedAlias === normalized;
+    });
+    
+    if (isMatch) {
+      for (const alias of aliases) {
+        const normalizedAlias = alias.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        if (components[normalizedAlias]) {
+          return normalizedAlias;
+        }
+        const withHtml = `${normalizedAlias} (html)`;
+        if (components[withHtml]) {
+          return withHtml;
+        }
+      }
+    }
+  }
+  
+  for (const compKey of Object.keys(components)) {
+    const compKeyNorm = compKey.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (compKeyNorm.includes(normalized) || normalized.includes(compKeyNorm)) {
+      return compKey;
+    }
+  }
+  
+  return null;
+}
+
 function parseCodeBlocks(markdown, format = 'html') {
   const examples = [];
   const lines = markdown.split('\n');
@@ -304,28 +346,15 @@ async function getComponentCode(tech, component, variant = null) {
     return `Error: Debes especificar un nombre de componente.\n\nComponentes disponibles (${available.length} total):\n- ${available.join("\n- ")}`;
   }
   
-  const normalizedName = normalizeComponentName(component);
-  let key = normalizedName || component.toLowerCase().trim();
+  let key = findComponentKey(components, component);
 
-  if (!components[key]) {
-    const keyWithoutS = key.replace(/s$/, '');
-    if (components[keyWithoutS]) {
-      key = keyWithoutS;
-    } else {
-      for (const compKey of Object.keys(components)) {
-        if (compKey.includes(key) || key.includes(compKey)) {
-          key = compKey;
-          break;
-        }
-      }
-    }
-  }
-
-  if (!components[key]) {
+  if (!key) {
     const available = Object.keys(components);
-    const suggestions = available.filter(k => 
-      k.includes(key.substring(0, 3)) || key.includes(k.substring(0, 3))
-    ).slice(0, 5);
+    const searchNorm = component.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const suggestions = available.filter(k => {
+      const kNorm = k.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      return kNorm.includes(searchNorm.substring(0, 3)) || searchNorm.includes(kNorm.substring(0, 3));
+    }).slice(0, 5);
     
     let response = `Componente '${component}' no encontrado.`;
     if (suggestions.length > 0) {
