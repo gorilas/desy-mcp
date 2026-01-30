@@ -200,6 +200,12 @@ function parseCodeBlocks(markdown, format = 'html') {
 }
 
 function formatCodeOutput(examples, format = 'html', variant = null) {
+  const allVariants = examples
+    .filter(ex => format === 'html' ? ex.html : ex.nunjucks)
+    .map(ex => ex.title);
+  
+  let filteredExamples = examples;
+  
   if (variant) {
     const variantLower = variant.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     const filtered = examples.filter(ex => {
@@ -208,20 +214,24 @@ function formatCodeOutput(examples, format = 'html', variant = null) {
     });
     
     if (filtered.length > 0) {
-      examples = filtered;
+      filteredExamples = filtered;
     }
   }
   
   const output = [];
   
-  for (const example of examples) {
+  if (!variant && allVariants.length > 1) {
+    output.push(`**Variantes disponibles (${allVariants.length}):** ${allVariants.join(', ')}\n`);
+  }
+  
+  for (const example of filteredExamples) {
     const code = format === 'html' ? example.html : example.nunjucks;
     if (code) {
       output.push(`### ${example.title}\n\`\`\`${format === 'html' ? 'html' : 'js'}\n${code}\n\`\`\``);
     }
   }
   
-  if (output.length === 0) {
+  if (output.length === 0 || (output.length === 1 && output[0].startsWith('**Variantes'))) {
     return `No se encontraron ejemplos de código ${format.toUpperCase()} para este componente.`;
   }
   
