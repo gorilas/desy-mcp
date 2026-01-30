@@ -430,24 +430,74 @@ async function searchComponents(query) {
     }));
   }
   
-  const queryLower = query.toLowerCase();
+  const queryLower = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const normalizedQuery = normalizeComponentName(query);
   const results = [];
+  const seen = new Set();
+
+  if (normalizedQuery && components[normalizedQuery]) {
+    const comp = components[normalizedQuery];
+    results.push({
+      name: comp.name,
+      canonicalName: normalizedQuery,
+      description: comp.description,
+      category: comp.category,
+      url: comp.url,
+      hasHtml: comp.hasHtml,
+      hasNunjucks: comp.hasNunjucks,
+      hasAngular: comp.hasAngular,
+      matchType: 'exact',
+    });
+    seen.add(normalizedQuery);
+  }
+
+  for (const [canonical, aliases] of Object.entries(COMPONENT_ALIASES)) {
+    if (seen.has(canonical)) continue;
+    
+    for (const alias of aliases) {
+      const normalizedAlias = alias.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      if (normalizedAlias.includes(queryLower) || queryLower.includes(normalizedAlias)) {
+        if (components[canonical]) {
+          const comp = components[canonical];
+          results.push({
+            name: comp.name,
+            canonicalName: canonical,
+            description: comp.description,
+            category: comp.category,
+            url: comp.url,
+            hasHtml: comp.hasHtml,
+            hasNunjucks: comp.hasNunjucks,
+            hasAngular: comp.hasAngular,
+            matchType: 'alias',
+            matchedAlias: alias,
+          });
+          seen.add(canonical);
+          break;
+        }
+      }
+    }
+  }
 
   for (const [key, comp] of Object.entries(components)) {
-    if (
-      key.includes(queryLower) ||
-      comp.name.toLowerCase().includes(queryLower) ||
-      comp.description.toLowerCase().includes(queryLower)
-    ) {
+    if (seen.has(key)) continue;
+    
+    const keyNorm = key.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const nameNorm = comp.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const descNorm = comp.description.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    
+    if (keyNorm.includes(queryLower) || nameNorm.includes(queryLower) || descNorm.includes(queryLower)) {
       results.push({
         name: comp.name,
+        canonicalName: key,
         description: comp.description,
         category: comp.category,
         url: comp.url,
         hasHtml: comp.hasHtml,
         hasNunjucks: comp.hasNunjucks,
         hasAngular: comp.hasAngular,
+        matchType: 'partial',
       });
+      seen.add(key);
     }
   }
 
