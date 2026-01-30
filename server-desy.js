@@ -221,7 +221,7 @@ function formatCodeOutput(examples, format = 'html', variant = null) {
   const output = [];
   
   if (!variant && allVariants.length > 1) {
-    output.push(`**Variantes disponibles (${allVariants.length}):** ${allVariants.join(', ')}\n`);
+    output.push(`**Variantes disponibles (${allVariants.length}):** ${allVariants.join(', ')}\n\n_Para filtrar, usa el parámetro \`variant\`. Ejemplo: variant="primario"_\n`);
   }
   
   for (const example of filteredExamples) {
