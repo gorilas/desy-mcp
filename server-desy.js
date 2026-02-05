@@ -711,6 +711,20 @@ function generateInstallationHTML() {
 
   const clients = [
     {
+      name: "OpenCode",
+      icon: "https://opencode.ai/favicon.ico",
+      instructions: `Añadir a <code>opencode.json</code> (proyecto) o <code>~/.config/opencode/opencode.json</code> (global):`,
+      config: {
+        mcp: {
+          "desy": {
+            type: "remote",
+            url: `${SERVER_URL}/mcp`,
+            enabled: true
+          }
+        }
+      }
+    },
+    {
       name: "VS Code",
       icon: "https://www.google.com/s2/favicons?domain=code.visualstudio.com&sz=64",
       instructions: `Añadir al <code>settings.json</code> de VS Code:`,
