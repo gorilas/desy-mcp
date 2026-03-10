@@ -58,6 +58,9 @@ El servidor HTTP se ejecuta en el puerto 5000 y proporciona:
 
 ## Recent Changes
 
+- **2026-03-10**: Rediseñada la página de inicio con los estilos del sistema de diseño DESY (colores, tipografía Open Sans, espaciado)
+- **2026-03-10**: Agregada funcionalidad de copiar URL al portapapeles con feedback visual
+- **2026-03-10**: URL del servidor MCP alineada a la izquierda con fondo blanco
 - **2026-02-05**: Añadidas instrucciones de instalación para OpenCode (primera posición en la página de inicio)
 - **2026-01-30**: Añadida lista de variantes disponibles al inicio de la respuesta cuando no se especifica variante
 - **2026-01-30**: Mejorada búsqueda de componentes con función `findComponentKey()` para soportar aliases bidireccionales

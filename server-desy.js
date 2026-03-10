@@ -892,6 +892,19 @@ function generateInstallationHTML() {
       display: inline-block;
       border: 1px solid #92949b;
       word-break: break-all;
+      cursor: pointer;
+      user-select: all;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .server-url:hover {
+      background-color: #f6f6f5;
+      border-color: #00607a;
+    }
+
+    .server-url.copied {
+      background-color: #d6eaf0;
+      border-color: #00607a;
     }
 
     h2 {
@@ -1122,6 +1135,21 @@ function generateInstallationHTML() {
       <p>Desarrollado para el <a href="https://desy.aragon.es" target="_blank">Sistema de Diseño DESY</a> del <a href="https://www.aragon.es" target="_blank">Gobierno de Aragón</a></p>
     </footer>
   </div>
+
+  <script>
+    document.querySelector('.server-url').addEventListener('click', async function() {
+      const url = this.textContent;
+      try {
+        await navigator.clipboard.writeText(url);
+        this.classList.add('copied');
+        setTimeout(() => {
+          this.classList.remove('copied');
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy:', err);
+      }
+    });
+  </script>
 </body>
 </html>`;
 }
