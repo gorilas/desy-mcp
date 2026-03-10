@@ -820,214 +820,266 @@ function generateInstallationHTML() {
   <title>DESY MCP Server - Instalación</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="apple-touch-icon" href="/favicon.svg">
-  <link rel="mask-icon" href="/favicon.svg" color="#fce400">
+  <link rel="mask-icon" href="/favicon.svg" color="#00607a">
   <meta name="msapplication-TileImage" content="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-    
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      font-family: 'Open Sans', ui-sans-serif, system-ui, sans-serif;
+      background: #f6f6f5;
       min-height: 100vh;
-      color: #e0e0e0;
-      line-height: 1.6;
+      color: #1f2331;
+      line-height: 1.5;
     }
-    
+
+    .page-header {
+      background: #26374a;
+      padding: 2.5rem 1.25rem;
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .page-header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+      line-height: 1.25;
+    }
+
+    .page-header .subtitle {
+      font-size: 1.125rem;
+      color: #d6eaf0;
+      font-weight: 400;
+    }
+
     .container {
       max-width: 900px;
       margin: 0 auto;
-      padding: 40px 20px;
+      padding: 0 1.25rem 2.5rem;
     }
-    
-    header {
-      text-align: center;
-      margin-bottom: 50px;
-    }
-    
-    h1 {
-      font-size: 2.5rem;
-      color: #fff;
-      margin-bottom: 10px;
-    }
-    
-    .subtitle {
-      font-size: 1.2rem;
-      color: #a0a0a0;
-    }
-    
+
     .server-info {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 40px;
+      background: #d6eaf0;
+      border: 1px solid #00607a;
+      border-radius: 0.25rem;
+      padding: 1.25rem;
+      margin-bottom: 2.5rem;
       text-align: center;
     }
-    
+
+    .server-info p {
+      color: #1f2331;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
     .server-url {
-      font-family: monospace;
-      font-size: 1.1rem;
-      color: #4fc3f7;
-      background: rgba(79, 195, 247, 0.1);
-      padding: 10px 20px;
-      border-radius: 6px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 1rem;
+      color: #00475c;
+      background: #fff;
+      padding: 0.625rem 1.25rem;
+      border-radius: 0.25rem;
       display: inline-block;
+      border: 1px solid #92949b;
+      word-break: break-all;
     }
-    
+
     h2 {
-      font-size: 1.8rem;
-      margin-bottom: 30px;
-      color: #fff;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.75rem;
+      color: #1f2331;
       text-align: center;
+      line-height: 1.25;
     }
-    
+
     .clients-grid {
       display: grid;
-      gap: 20px;
+      gap: 1rem;
     }
-    
+
     .client-card {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 25px;
-      transition: transform 0.2s, box-shadow 0.2s;
+      background: #fff;
+      border: 1px solid #92949b;
+      border-radius: 0.25rem;
+      padding: 1.75rem;
+      transition: box-shadow 0.2s;
     }
-    
+
     .client-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 4px 12px rgba(31, 35, 49, 0.1);
     }
-    
+
     .client-header {
       display: flex;
       align-items: center;
-      gap: 15px;
-      margin-bottom: 15px;
+      gap: 1rem;
+      margin-bottom: 1rem;
     }
-    
+
     .client-icon {
       width: 32px;
       height: 32px;
-      border-radius: 6px;
+      border-radius: 0.25rem;
     }
-    
+
     .client-header h3 {
-      font-size: 1.3rem;
-      color: #fff;
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #1f2331;
       flex-grow: 1;
+      line-height: 1.25;
     }
-    
+
     .install-button {
-      background: #22c55e;
+      background: #00607a;
       color: #fff;
-      padding: 8px 16px;
-      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
       text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: background 0.2s, transform 0.2s;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: background 0.2s;
       white-space: nowrap;
+      display: inline-block;
     }
-    
+
     .install-button:hover {
-      background: #16a34a;
-      transform: translateY(-1px);
+      background: #00475c;
     }
-    
+
     .client-instructions p {
-      margin-bottom: 15px;
-      color: #b0b0b0;
+      margin-bottom: 1rem;
+      color: #5e616b;
+      font-size: 1rem;
+      line-height: 1.5;
     }
-    
+
     .client-instructions ul {
-      margin: 10px 0 15px 20px;
-      color: #b0b0b0;
+      margin: 0.5rem 0 1rem 1.25rem;
+      color: #5e616b;
     }
-    
+
+    .client-instructions ul li {
+      margin-bottom: 0.25rem;
+    }
+
     pre {
-      background: #0d1117;
-      border-radius: 8px;
-      padding: 15px;
+      background: #1f2331;
+      border-radius: 0.25rem;
+      padding: 1rem;
       overflow-x: auto;
     }
-    
+
     code {
-      font-family: 'Fira Code', 'Consolas', monospace;
-      font-size: 0.9rem;
-      color: #79c0ff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.875rem;
+      color: #d6eaf0;
     }
-    
+
+    p code, li code {
+      background: #ededec;
+      color: #c10007;
+      padding: 0.125rem 0.375rem;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+    }
+
     .tools-section {
-      margin-top: 50px;
-      padding-top: 40px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 2.5rem;
+      padding-top: 2.5rem;
+      border-top: 1px solid #92949b;
     }
-    
+
     .tools-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 15px;
-      margin-top: 20px;
+      gap: 1rem;
+      margin-top: 1.25rem;
     }
-    
+
     .tool-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 8px;
-      padding: 15px;
+      background: #fff;
+      border: 1px solid #ededec;
+      border-left: 4px solid #00607a;
+      border-radius: 0.25rem;
+      padding: 1rem;
     }
-    
+
     .tool-card h4 {
-      color: #4fc3f7;
-      font-family: monospace;
-      margin-bottom: 8px;
+      color: #00607a;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.875rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
     }
-    
+
     .tool-card p {
-      font-size: 0.9rem;
-      color: #909090;
+      font-size: 0.875rem;
+      color: #5e616b;
+      line-height: 1.5;
     }
-    
+
     footer {
-      margin-top: 60px;
+      margin-top: 2.5rem;
+      padding-top: 1.75rem;
+      border-top: 1px solid #ededec;
       text-align: center;
-      color: #606060;
-      font-size: 0.9rem;
+      color: #5e616b;
+      font-size: 0.875rem;
     }
-    
+
     footer a {
-      color: #4fc3f7;
-      text-decoration: none;
-    }
-    
-    footer a:hover {
+      color: #00607a;
       text-decoration: underline;
+    }
+
+    footer a:hover {
+      color: #00475c;
+    }
+
+    @media (max-width: 600px) {
+      .page-header h1 {
+        font-size: 1.875rem;
+      }
+      .client-header {
+        flex-wrap: wrap;
+      }
+      .install-button {
+        width: 100%;
+        text-align: center;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="page-header">
+    <h1>DESY MCP Server</h1>
+    <p class="subtitle">Sistema de Diseño del Gobierno de Aragón</p>
+  </div>
+
   <div class="container">
-    <header>
-      <h1>DESY MCP Server</h1>
-      <p class="subtitle">Sistema de Diseño del Gobierno de Aragón</p>
-    </header>
-    
     <div class="server-info">
-      <p>URL del servidor MCP:</p>
+      <p>URL del servidor MCP</p>
       <div class="server-url">${SERVER_URL}/mcp</div>
     </div>
-    
+
     <h2>Instrucciones de Instalación</h2>
-    
+
     <div class="clients-grid">
       ${clientCards}
     </div>
-    
+
     <div class="tools-section">
       <h2>Herramientas Disponibles</h2>
       <div class="tools-grid">
@@ -1065,7 +1117,7 @@ function generateInstallationHTML() {
         </div>
       </div>
     </div>
-    
+
     <footer>
       <p>Desarrollado para el <a href="https://desy.aragon.es" target="_blank">Sistema de Diseño DESY</a> del <a href="https://www.aragon.es" target="_blank">Gobierno de Aragón</a></p>
     </footer>
