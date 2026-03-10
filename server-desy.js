@@ -1046,7 +1046,6 @@ function generateInstallationHTML() {
     footer {
       margin-top: 2.5rem;
       padding-top: 1.75rem;
-      border-top: 1px solid #ededec;
       text-align: center;
       color: #5e616b;
       font-size: 0.875rem;
