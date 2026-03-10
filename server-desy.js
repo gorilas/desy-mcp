@@ -834,7 +834,7 @@ function generateInstallationHTML() {
 
     body {
       font-family: 'Open Sans', ui-sans-serif, system-ui, sans-serif;
-      background: #f6f6f5;
+      background: #fff;
       min-height: 100vh;
       color: #1f2331;
       line-height: 1.5;
@@ -899,7 +899,7 @@ function generateInstallationHTML() {
       font-weight: 700;
       margin-bottom: 1.75rem;
       color: #1f2331;
-      text-align: center;
+      text-align: left;
       line-height: 1.25;
     }
 
