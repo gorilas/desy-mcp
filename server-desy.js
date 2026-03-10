@@ -907,6 +907,18 @@ function generateInstallationHTML() {
       border-color: #00607a;
     }
 
+    .server-url-feedback {
+      display: none;
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+      color: #00607a;
+      font-weight: 600;
+    }
+
+    .server-url-feedback.show {
+      display: block;
+    }
+
     h2 {
       font-size: 1.5rem;
       font-weight: 700;
@@ -1082,7 +1094,10 @@ function generateInstallationHTML() {
   <div class="container">
     <div class="server-info">
       <p>URL del servidor MCP</p>
-      <div class="server-url">${SERVER_URL}/mcp</div>
+      <div>
+        <div class="server-url">${SERVER_URL}/mcp</div>
+        <div class="server-url-feedback">¡Copiado al portapapeles!</div>
+      </div>
     </div>
 
     <h2>Instrucciones de Instalación</h2>
@@ -1135,13 +1150,18 @@ function generateInstallationHTML() {
   </div>
 
   <script>
-    document.querySelector('.server-url').addEventListener('click', async function() {
+    const serverUrlElement = document.querySelector('.server-url');
+    const feedbackElement = document.querySelector('.server-url-feedback');
+    
+    serverUrlElement.addEventListener('click', async function() {
       const url = this.textContent;
       try {
         await navigator.clipboard.writeText(url);
         this.classList.add('copied');
+        feedbackElement.classList.add('show');
         setTimeout(() => {
           this.classList.remove('copied');
+          feedbackElement.classList.remove('show');
         }, 2000);
       } catch (err) {
         console.error('Failed to copy:', err);
