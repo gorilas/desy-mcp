@@ -1011,7 +1011,6 @@ function generateInstallationHTML() {
     .tools-section {
       margin-top: 2.5rem;
       padding-top: 2.5rem;
-      border-top: 1px solid #92949b;
     }
 
     .tools-grid {
