@@ -4,7 +4,7 @@
 
 Este servidor MCP proporciona acceso programático a la documentación de DESY, permitiendo a los asistentes de IA obtener código de componentes, guías de estilo y patrones.
 
-**URL de producción**: https://desy-mcp.replit.app
+**URL de producción**: https://desy-mcp-production.up.railway.app/
 
 ## Servidor MCP de DESY
 
@@ -37,7 +37,7 @@ Añadir a `~/.cursor/mcp.json` o `.cursor/mcp.json` (proyecto-específico):
 {
   "mcpServers": {
     "DESY MCP Server": {
-      "url": "https://desy-mcp.replit.app"
+      "url": "https://desy-mcp-production.up.railway.app/"
     }
   }
 }
@@ -53,7 +53,7 @@ Añadir al `settings.json` de VS Code:
     "servers": {
       "DESY MCP Server": {
         "type": "http",
-        "url": "https://desy-mcp.replit.app"
+        "url": "https://desy-mcp-production.up.railway.app/"
       }
     }
   }
@@ -65,14 +65,14 @@ Añadir al `settings.json` de VS Code:
 1. Ir a **Settings → Connectors → Add Custom Connector**
 2. Rellenar:
    - **Name**: `DESY MCP Server`
-   - **URL**: `https://desy-mcp.replit.app`
+   - **URL**: `https://desy-mcp-production.up.railway.app/`
 
 ### Claude Code
 
 Ejecutar en terminal:
 
 ```bash
-claude mcp add --transport http "DESY-MCP-Server" https://desy-mcp.replit.app
+claude mcp add --transport http "DESY-MCP-Server" https://desy-mcp-production.up.railway.app/
 ```
 
 ### Windsurf
@@ -81,7 +81,7 @@ claude mcp add --transport http "DESY-MCP-Server" https://desy-mcp.replit.app
 {
   "mcpServers": {
     "DESY MCP Server": {
-      "serverUrl": "https://desy-mcp.replit.app"
+      "serverUrl": "https://desy-mcp-production.up.railway.app/"
     }
   }
 }
