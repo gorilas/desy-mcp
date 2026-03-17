@@ -26,7 +26,7 @@ app.use(cors({
 app.use(express.json());
 
 const PORT = 5000;
-const SERVER_URL = "https://desy-mcp-production.up.railway.app/";
+const SERVER_URL = "https://desy-mcp.up.railway.app/";
 const LLMS_TXT_URL = "https://desy.aragon.es/llms.txt";
 const CACHE_DURATION_MS = 24 * 60 * 60 * 1000;
 

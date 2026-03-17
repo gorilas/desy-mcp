@@ -58,7 +58,7 @@ import cors from "cors";
 
 ```javascript
 const PORT = 5000;
-const SERVER_URL = "https://desy-mcp-production.up.railway.app/";
+const SERVER_URL = "https://desy-mcp.up.railway.app/";
 ```
 
 ### Types

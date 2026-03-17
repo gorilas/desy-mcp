@@ -11,7 +11,7 @@
 // DESY Server Configuration
 const DESY_CONFIG = {
   serverName: "DESY MCP Server",
-  mcpUrl: "https://desy-mcp-production.up.railway.app/"
+  mcpUrl: "https://desy-mcp.up.railway.app/"
 };
 
 /**

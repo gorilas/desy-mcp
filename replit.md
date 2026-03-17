@@ -6,7 +6,7 @@ Servidor MCP para el Sistema de Diseño del Gobierno de Aragón (DESY).
 
 Este proyecto proporciona un servidor MCP (Model Context Protocol) que da acceso programático a la documentación del sistema de diseño DESY, incluyendo componentes, patrones, guías de estilo y código en HTML, Nunjucks y Angular.
 
-**URL de producción**: https://desy-mcp-production.up.railway.app/
+**URL de producción**: https://desy-mcp.up.railway.app/
 
 ## Project Structure
 
@@ -70,4 +70,4 @@ El servidor HTTP se ejecuta en el puerto 5000 y proporciona:
 - Reorganizada estructura de archivos (todo en la raíz)
 - Convertido a servidor HTTP con Express (puerto 5000)
 - Añadida página de instrucciones de instalación
-- Configurado para deploy en https://desy-mcp-production.up.railway.app/
+- Configurado para deploy en https://desy-mcp.up.railway.app/
